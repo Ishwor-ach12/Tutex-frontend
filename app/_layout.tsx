@@ -18,6 +18,7 @@ export default function RootLayout() {
 
       if (!signedup || !lang) setInitialRoute("(onboarding)");
       else if (!profile) setInitialRoute("(auth)");
+      // if (!profile) setInitialRoute("(auth)");
       else if (token) setInitialRoute("(main)");
       else setInitialRoute("(auth)");
     };

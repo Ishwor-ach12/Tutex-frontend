@@ -12,7 +12,7 @@ export default function LanguageScreen() {
   const handleLanguageSelect = async (lang: string) => {
     setSelected(lang);
     await AsyncStorage.setItem("selectedLanguage", lang);
-    router.replace("/(onboarding)/SignupTutorial");
+    router.replace("/(auth)/Login");
   };
 
   return (
