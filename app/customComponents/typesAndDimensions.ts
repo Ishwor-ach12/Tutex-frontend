@@ -17,3 +17,4 @@ export const NUM_COLUMNS = 2;
 export const EXPLORE_ITEM_WIDTH = (width - ITEM_MARGIN * 3) / NUM_COLUMNS;
 // Lesson Card: Single horizontal item (35% of width)
 export const LESSON_CARD_WIDTH = width * 0.35;
+export const LESSON_CARD_WIDTH_LARGE = width * 0.45;

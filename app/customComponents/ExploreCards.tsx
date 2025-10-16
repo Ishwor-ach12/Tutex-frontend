@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, Image, ListRenderItemInfo, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, ListRenderItemInfo, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { EXPLORE_ITEM_WIDTH, ITEM_MARGIN, NUM_COLUMNS, Tutorial } from './typesAndDimensions';
 
 const exploreData: Tutorial[] = [
@@ -11,23 +12,32 @@ const exploreData: Tutorial[] = [
 ];
 
 
-const ExploreCard: React.FC<{ item: Tutorial }> = ({ item }) => (
-  <View style={[styles.exploreCard, { width: EXPLORE_ITEM_WIDTH }]}>
-    {/* Placeholder for the gradient/image */}
-<Image 
-      source={item.image} 
-      style={styles.cardImage} 
-    />
-    <LinearGradient
-      colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']} // Transparent at top, solid black at bottom
-      style={styles.gradientOverlay}
-    />
-    <View style={styles.exploreTextContainer}>
-      <Text style={styles.exploreTitle}>{item.title}</Text>
-      <Text style={styles.exploreLessons}>Lessons: {item.lessons}</Text>
-    </View>
-  </View>
-);
+
+const ExploreCard: React.FC<{ item: Tutorial }> = ({ item }) => {
+  const router = useRouter(); // ✅ hook at top level
+
+  const handlePress = () => {
+    router.push("/(main)/(tutorials)/SampleTutorial/DetailPage");
+  };
+
+  return (
+    <TouchableOpacity
+      style={[styles.exploreCard, { width: EXPLORE_ITEM_WIDTH }]}
+      onPress={handlePress} // ✅ no arrow function needed unless you pass args
+    >
+      <Image source={item.image} style={styles.cardImage} />
+      <LinearGradient
+        colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
+        style={styles.gradientOverlay}
+      />
+      <View style={styles.exploreTextContainer}>
+        <Text style={styles.exploreTitle}>{item.title}</Text>
+        <Text style={styles.exploreLessons}>Lessons: {item.lessons}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 
 const ExploreCards = () => {
       const renderExploreCard = ({ item }: ListRenderItemInfo<Tutorial>) => (

@@ -1,5 +1,4 @@
-// CustomTabBar.tsx (You can put this in a separate file or inline in MainLayout.tsx)
-
+// CustomTabBar.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useNavigation } from 'expo-router';
@@ -23,11 +22,19 @@ const getIconName = (routeName: string, isFocused: boolean): string => {
 };
 
 const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
-  const router = useNavigation(); // Use useNavigation or useRouter if needed
+  const router = useNavigation();
+
+  // Define which routes should be visible in the tab bar
+  const visibleRoutes = ['(tabs)/home', '(tabs)/search', '(tabs)/analytics', '(tabs)/profile'];
 
   return (
     <View style={styles.tabBarContainer}>
       {state.routes.map((route, index) => {
+        // Skip routes that shouldn't be in the tab bar
+        if (!visibleRoutes.includes(route.name)) {
+          return null;
+        }
+
         const { options } = descriptors[route.key];
         const isFocused = state.index === index;
         const label = options.title !== undefined ? options.title : route.name;
@@ -41,7 +48,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
           });
 
           if (!isFocused && !event.defaultPrevented) {
-            // Navigate to the new tab
             navigation.navigate(route.name);
           }
         };
@@ -59,15 +65,14 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
-            // testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
             style={styles.tabBarButton}
           >
             <Ionicons
-              name={iconName as any} // Cast to 'any' for simpler icon handling
+              name={iconName as any}
               size={24}
-              color={isFocused ? '#0d6efd' : '#888'} // Custom active/inactive colors
+              color={isFocused ? '#0d6efd' : '#888'}
             />
             <Text style={{ color: isFocused ? '#0d6efd' : '#888', fontSize: 12 }}>
               {label}
@@ -82,11 +87,11 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
-    height: 70, // Custom height for the navbar
-    backgroundColor: 'white', // Custom background color
+    height: 70,
+    backgroundColor: 'white',
     borderTopWidth: 1,
-    borderTopColor: '#f0ffdf', // Custom separator line
-    paddingBottom: 10, // Account for bottom safe area
+    borderTopColor: '#f0ffdf',
+    paddingBottom: 10,
   },
   tabBarButton: {
     flex: 1,
@@ -96,4 +101,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomTabBar
+export default CustomTabBar;

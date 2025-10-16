@@ -10,7 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { LESSON_CARD_WIDTH, Tutorial } from "./typesAndDimensions";
+import {
+  ITEM_MARGIN,
+  LESSON_CARD_WIDTH_LARGE,
+  NUM_COLUMNS,
+  Tutorial,
+} from "../../customComponents/typesAndDimensions";
 import { Ionicons } from "@expo/vector-icons";
 
 const yourLessonsData: Tutorial[] = [
@@ -18,28 +23,28 @@ const yourLessonsData: Tutorial[] = [
     id: "yl1",
     title: "Web Development Basics",
     lessons: 5,
-    image: require("../../assets/amazon.png"),
+    image: require("../../../assets/amazon.png"),
     status: "Ongoing",
   },
   {
     id: "yl2",
     title: "Data Structures 101",
     lessons: 3,
-    image: require("../../assets/whatsapp.png"),
+    image: require("../../../assets/whatsapp.png"),
     status: "Ongoing",
   },
   {
     id: "yl3",
     title: "Mobile App Design",
     lessons: 8,
-    image: require("../../assets/uber.png"),
+    image: require("../../../assets/uber.png"),
     status: "Ongoing",
   },
   {
     id: "yl4",
     title: "Advanced React Native",
     lessons: 2,
-    image: require("../../assets/phonepeBanner.png"),
+    image: require("../../../assets/phonepeBanner.png"),
     status: "Ongoing",
   },
 ];
@@ -101,7 +106,7 @@ const OngoingLessons = () => {
   const router = useRouter();
   const handleSeeAll = () => {
     // Assuming you have a route like 'all-lessons' or similar
-    router.push("/(main)/(main-routes)/OngoingLessonPage");
+    router.push("/");
     // If 'all-lessons' is a screen within your tabs, use: router.push('/(tabs)/all-lessons');
     // Adjust the path to match your file-based routing structure.
   };
@@ -112,17 +117,15 @@ const OngoingLessons = () => {
     <>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Ongoing Lessons</Text>
-        <TouchableOpacity onPress={handleSeeAll}>
-          <Text style={styles.seeAllText}>See all</Text>
-        </TouchableOpacity>
       </View>
       <FlatList
-        data={yourLessonsData}
+        data={tutorials}
         renderItem={renderYourLessonCard}
         keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.lessonsListContainer}
+        numColumns={NUM_COLUMNS}
+        scrollEnabled={false} // Important: Disable internal scrolling to allow the parent ScrollView to handle it
+        columnWrapperStyle={styles.exploreColumnWrapper}
+        contentContainerStyle={styles.exploreListContainer}
       />
     </>
   );
@@ -162,12 +165,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   lessonCard: {
-    width: LESSON_CARD_WIDTH,
-    height: 230,
+    width: LESSON_CARD_WIDTH_LARGE,
+    height: 330,
     borderRadius: 10,
     marginRight: 15,
     overflow: "hidden",
     backgroundColor: "#f0f0f0",
+  },
+  exploreListContainer: {
+    paddingHorizontal: ITEM_MARGIN,
+    paddingBottom: 20,
+  },
+  exploreColumnWrapper: {
+    justifyContent: "space-between",
+    marginBottom: ITEM_MARGIN,
   },
   gradientPlaceholder: {
     ...StyleSheet.absoluteFillObject,
@@ -190,13 +201,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    padding: 10,
+    padding: 15,
   },
   lessonTitle: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 18,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
@@ -205,6 +216,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0d6efd",
     borderRadius: 5,
     paddingVertical: 6,
+    marginRight: "40%",
     alignItems: "center",
   },
   continueButtonText: {

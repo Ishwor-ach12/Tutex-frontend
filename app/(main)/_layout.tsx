@@ -78,6 +78,13 @@ export default function MainLayout() {
         <Tabs.Screen name="(tabs)/search" options={{ title: "Search" }} />
         <Tabs.Screen name="(tabs)/analytics" options={{ title: "Analytics" }} />
         <Tabs.Screen name="(tabs)/profile" options={{ title: "Profile" }} />
+        <Tabs.Screen 
+          name="(main-routes)" 
+          options={{ 
+            title: "Ongoing Lesson",
+            tabBarButton: () => null  // This prevents the tab from rendering
+          }} 
+        />
       </Tabs>
     </View>
   );
