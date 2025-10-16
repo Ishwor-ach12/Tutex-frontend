@@ -1,43 +1,84 @@
 import { Tabs } from "expo-router";
-import { Image, Text, View } from "react-native";
+import { Image, Text, TextStyle, View, ViewStyle } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import CustomTabBar from "../customComponents/CustomTabBar";
+// The edges prop is important to specify which edges to apply padding to
 
+// Define the styles within the component file or import a StyleSheet object
+
+/**
+ * Custom Header Component
+ */
 function Header() {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 12,
-        backgroundColor: "#f8f9fa",
-        borderBottomWidth: 1,
-        borderColor: "#ddd",
-      }}
-    >
+    <View style={HeaderStyles.container as ViewStyle}>
       <Image
         source={require("../../assets/logo.png")}
-        style={{ width: 30, height: 30, marginRight: 10 }}
+        style={HeaderStyles.logo}
       />
-      <Text style={{ fontSize: 18, fontWeight: "bold" }}>MyApp</Text>
+      <View style={HeaderStyles.textContainer}>
+        <Text style={HeaderStyles.title as TextStyle}>Tutex</Text>
+        <Text style={HeaderStyles.subtitle as TextStyle}>
+          Tutorial to Experience
+        </Text>
+      </View>
     </View>
   );
 }
 
+const HeaderStyles = {
+  container: {
+    height: 75,
+    flexDirection: "row",
+    alignItems: "flex-end", // Aligns content to the bottom of the 100px view
+    paddingLeft: 12,
+    backgroundColor: "#0d6efd",
+  },
+  logo: {
+    width: 72,
+    height: 72,
+    marginRight: 10,
+  },
+  textContainer: {
+    padding: 8,
+  },
+  title: {
+    color: "white",
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+  subtitle: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+};
+
+/**
+ * Main Layout Component with Fixed Header and Tabs Navbar
+ */
 export default function MainLayout() {
   return (
-    <>
-      <Header />
+    <View style={{ flex: 1 }}>
+      {/* Fixed Header */}
+      <SafeAreaView style={{ backgroundColor: "#0d6efd" }} edges={["top"]}>
+        <Header />
+      </SafeAreaView>
+
+      {/* Tabs Layout */}
       <Tabs
+        // Move tabBar here, outside of screenOptions
+        tabBar={(props) => <CustomTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: "#3b5998",
+          // Remove the tabBar prop from here, as it's not valid for screenOptions
         }}
       >
-        <Tabs.Screen name="home" options={{ title: "Home" }} />
-        <Tabs.Screen name="analytics" options={{ title: "Analytics" }} />
-        <Tabs.Screen name="search" options={{ title: "Search" }} />
-        <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+        <Tabs.Screen name="(tabs)/home" options={{ title: "Home" }} />
+        <Tabs.Screen name="(tabs)/search" options={{ title: "Search" }} />
+        <Tabs.Screen name="(tabs)/analytics" options={{ title: "Analytics" }} />
+        <Tabs.Screen name="(tabs)/profile" options={{ title: "Profile" }} />
       </Tabs>
-    </>
+    </View>
   );
 }
