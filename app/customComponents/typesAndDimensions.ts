@@ -9,6 +9,20 @@ export type Tutorial = {
   status:string;
 };
 
+export interface AllCourseResponse {
+  message: string;
+  body: Course[];
+}
+
+export interface Course {
+  courseId: number;
+  title: string;
+  photoUrl: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // --- Dimension Calculations ---
 const { width } = Dimensions.get('window');
 export const ITEM_MARGIN = 15;

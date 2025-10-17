@@ -46,12 +46,10 @@ const Search = () => {
 
   const categories = [
     'All',
-    'Programming',
-    'Design',
-    'Business',
-    'Music',
-    'Photography',
-    'Fitness',
+    'UPI',
+    'WhatsApp',
+    'Booking',
+    'Social Media',
   ];
 
   // Debounce utility

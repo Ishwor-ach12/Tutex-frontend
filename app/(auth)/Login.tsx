@@ -20,10 +20,10 @@ export default function Login() {
   const router = useRouter();
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:9004/auth/login", {
+      const response = await fetch("https://tutex-vq6j.onrender.com/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username:email, password }),
       });
 
       if (!response.ok) {
@@ -33,8 +33,12 @@ export default function Login() {
       }
 
       const data = await response.json();
-      await AsyncStorage.setItem("jwtToken", data.token);
+      await AsyncStorage.setItem("authToken", data.body["auth_token"]);
+      console.log("hi1")
+      await AsyncStorage.setItem("userProfile", JSON.stringify(data.body["userProfile"]));
+      console.log("hi2")
       Alert.alert("Success", "Login successful!");
+      router.replace("/(main)/(tabs)/home")
       // redirect user here
     } catch (error) {
       Alert.alert("Error", "Cannot connect to server");
@@ -49,7 +53,7 @@ export default function Login() {
     <View style={styles.container}>
       {/* Top Section */}
       <View style={styles.topSection}>
-        <TouchableOpacity onPress={()=>{router.replace("/(tutorials)/LoginTutorial")}} style={styles.helpButton}>
+        <TouchableOpacity onPress={()=>{router.replace("../(tutorials)/LoginTutorial")}} style={styles.helpButton}>
           <Ionicons name="help-circle-outline" size={50} color={styles.helpButton.color}/>
         </TouchableOpacity>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />

@@ -1,3 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -10,8 +12,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { LESSON_CARD_WIDTH, Tutorial } from "./typesAndDimensions";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  AllCourseResponse,
+  LESSON_CARD_WIDTH,
+  Tutorial,
+} from "./typesAndDimensions";
 
 const yourLessonsData: Tutorial[] = [
   {
@@ -44,60 +49,107 @@ const yourLessonsData: Tutorial[] = [
   },
 ];
 
-const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => (
-  <View style={styles.lessonCard}>
-    {/* Placeholder for the gradient/image */}
-    <Image source={item.image} style={styles.cardImage} />
-    <LinearGradient
-      colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.9)"]} // Transparent at top, solid black at bottom
-      style={styles.gradientOverlay}
-    />
-    {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
-    <View style={styles.lessonIconContainer}>
-      <Ionicons name="bookmark" size={16} color="#0d6efd" />{" "}
-    </View>
+const imageMap: Record<string, any> = {
+  "phonepeBanner.png": require("../../assets/phonepeBanner.png"),
+  "amazon.png": require("../../assets/amazon.png"),
+  "uber.png": require("../../assets/uber.png"),
+  "whatsapp.png": require("../../assets/whatsapp.png"),
+};
 
-    <View style={styles.lessonTextContainer}>
-      <Text style={styles.lessonTitle}>{item.title}</Text>
-      <TouchableOpacity style={styles.continueButton}>
-        <Text style={styles.continueButtonText}>Continue</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
+const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
+  const router = useRouter();
+  return (
+    <TouchableOpacity
+      style={styles.lessonCard}
+      onPress={() =>
+        router.push({
+          pathname: "/(main)/(tutorials)/[id]/LessonPage",
+          params: { id: String(item.id) },
+        } as any)
+      }
+    >
+      {/* Placeholder for the gradient/image */}
+      <Image source={item.image} style={styles.cardImage} />
+      <LinearGradient
+        colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.9)"]} // Transparent at top, solid black at bottom
+        style={styles.gradientOverlay}
+      />
+      {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
+      <View style={styles.lessonIconContainer}>
+        <Ionicons name="bookmark" size={16} color="#0d6efd" />{" "}
+      </View>
+
+      <View style={styles.lessonTextContainer}>
+        <Text style={styles.lessonTitle}>{item.title}</Text>
+        <TouchableOpacity style={styles.continueButton}>
+          <Text style={styles.continueButtonText}>Continue</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const OngoingLessons = () => {
-  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [courses, setCourses] = useState<Tutorial[]>(yourLessonsData);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // API call
   useEffect(() => {
-    const fetchOngoingTutorials = async () => {
-      try {
-        setLoading(true);
-        // 🔹 Replace with your backend endpoint
-        const response = await fetch(
-          "http://localhost:9004/api/tutorials/ongoing"
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setTutorials(data);
-      } catch (err: any) {
-        console.error("Error fetching ongoing tutorials:", err);
-        setError("Failed to load tutorials. Please try again.");
-        setTutorials(yourLessonsData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOngoingTutorials();
+    fetchCourses();
   }, []);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get bearer token from AsyncStorage
+      const token = await AsyncStorage.getItem("authToken"); // Adjust key name as needed
+
+      if (!token) {
+        console.warn("No auth token found, using fallback data");
+        setCourses(yourLessonsData);
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        "https://tutex-vq6j.onrender.com/tutorial/all",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: AllCourseResponse = await response.json();
+
+      // Transform API response to Tutorial format
+      const transformedCourses: Tutorial[] = data.body.map((course) => ({
+        id: course.courseId.toString(),
+        title: course.title,
+        lessons: 0, // API doesn't provide lesson count, set default or fetch separately
+        image: imageMap[course.photoUrl], // Use photoUrl from API
+        status: "Ongoing" as const,
+      }));
+      console.log(transformedCourses);
+      setCourses(transformedCourses);
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch courses");
+      // Keep fallback data on error
+      setCourses(yourLessonsData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const router = useRouter();
   const handleSeeAll = () => {
     // Assuming you have a route like 'all-lessons' or similar
@@ -117,7 +169,7 @@ const OngoingLessons = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={yourLessonsData}
+        data={courses}
         renderItem={renderYourLessonCard}
         keyExtractor={(item) => item.id}
         horizontal
