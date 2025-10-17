@@ -79,6 +79,9 @@ export default function Signup() {
     <ScrollView style={styles.container}>
       {/* Top Blue Section */}
       <View style={styles.topSection}>
+        <TouchableOpacity onPress={()=>{router.replace("/(tutorials)/SignupTutorial")}} style={styles.helpButton}>
+          <Ionicons name="help-circle-outline" size={50} color={styles.helpButton.color}/>
+        </TouchableOpacity>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.logoText}>Tutex</Text>
       </View>
@@ -261,6 +264,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 36,
     fontWeight: "bold",
+  },
+
+  helpButton:{
+    color:"#fff",
+    marginLeft:"auto",
+    marginRight:13,
   },
 
   bottomSection: {
