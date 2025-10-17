@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -72,180 +73,203 @@ export default function Signup() {
     }
   };
 
-  const handleLogin = ()=>{
+  const handleLogin = () => {
     router.replace("/(auth)/Login");
-  }
+  };
   return (
-    <ScrollView style={styles.container}>
-      {/* Top Blue Section */}
-      <View style={styles.topSection}>
-        <TouchableOpacity onPress={()=>{router.replace("/(tutorials)/SignupTutorial")}} style={styles.helpButton}>
-          <Ionicons name="help-circle-outline" size={50} color={styles.helpButton.color}/>
-        </TouchableOpacity>
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.logoText}>Tutex</Text>
-      </View>
-
-      {/* Bottom White Section */}
-      <View style={styles.bottomSection}>
-        <View style={styles.cloudContainer}>
-          {[...Array(40)].map((_, index) => {
-            
-            const isLight = Math.random() < 0.85; // True ~50% of the time, False ~50% of the time
-            const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
-            const h = Math.random() * (80 - 48) + 48;
-            return (
-              <View
-                key={index}
-                style={[
-                  cloudStyle, // Apply the randomly chosen style (light or dark)
-                  {
-                    marginHorizontal: Math.random() * -24,
-                    marginVertical: Math.random() * -32,
-                    height: h,
-                    width: Math.random() * (120 - 80) + h * 1.2,
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-        <View style={styles.cloudContainer2}>
-          {[...Array(40)].map((_, index) => {
-            // Determine the style randomly
-            const isLight = Math.random() < 0.75; // True ~50% of the time, False ~50% of the time
-            const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
-            const h = Math.random() * (80 - 48) + 48;
-
-            return (
-              <View
-                key={index}
-                style={[
-                  cloudStyle, // Apply the randomly chosen style (light or dark)
-                  {
-                    marginHorizontal: Math.random() * -24,
-                    marginVertical: Math.random() * -32,
-                    height: h,
-                    width: Math.random() * (120 - 80) + h,
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-        <View style={styles.cloudContainer2}>
-          {[...Array(12)].map((_, index) => (
-            <View
-              key={index} // Keys are important for list items in React
-              style={[
-                styles.darkCloud,
-                {
-                  marginHorizontal: Math.random() * -24,
-                  marginVertical: Math.random() * -32,
-                },
-              ]}
-            />
-          ))}
-        </View>
-        <Text style={styles.title}>Sign Up</Text>
-
-        {/* Name */}
-        <Text style={styles.label}>Name</Text>
-        <View style={styles.inputContainer}>
-          <Ionicons name="person-outline" size={20} color="#666" />
-          <TextInput
-            placeholder="Enter your name"
-            placeholderTextColor="#888"
-            style={styles.input}
-            value={form.name}
-            onChangeText={(val) => setForm({ ...form, name: val })}
-          />
-        </View>
-
-        {/* Email */}
-        <Text style={styles.label}>Email</Text>
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#666" />
-          <TextInput
-            placeholder="Enter your email"
-            placeholderTextColor="#888"
-            style={styles.input}
-            keyboardType="email-address"
-            value={form.email}
-            onChangeText={(val) => setForm({ ...form, email: val })}
-          />
-        </View>
-
-        {/* Password */}
-        <Text style={styles.label}>Password</Text>
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#666" />
-          <TextInput
-            placeholder="Enter your password"
-            placeholderTextColor="#888"
-            style={styles.input}
-            secureTextEntry={!showPassword}
-            value={form.password}
-            onChangeText={(val) => setForm({ ...form, password: val })}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Top Blue Section */}
+        <View style={styles.topSection}>
+          <TouchableOpacity
+            onPress={() => {
+              router.replace("/(tutorials)/SignupTutorial");
+            }}
+            style={styles.helpButton}
+          >
             <Ionicons
-              name={showPassword ? "eye-outline" : "eye-off-outline"}
-              size={20}
-              color="#666"
+              name="help-circle-outline"
+              size={50}
+              color={styles.helpButton.color}
             />
           </TouchableOpacity>
-        </View>
-
-        {/* Date of Birth */}
-        <Text style={styles.label}>Date of Birth</Text>
-        <TouchableOpacity
-          style={styles.inputContainer}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Ionicons name="calendar-outline" size={20} color="#666" />
-          <Text style={[styles.input, { color: "black" }]}>
-            {form.dob.toDateString()}
-          </Text>
-        </TouchableOpacity>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={form.dob}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={(_: any, selectedDate?: Date) => {
-              setShowDatePicker(false);
-              if (selectedDate) setForm({ ...form, dob: selectedDate });
-            }}
+          <Image
+            source={require("../../assets/logo.png")}
+            style={styles.logo}
           />
-        )}
+          <Text style={styles.logoText}>Tutex</Text>
+        </View>
 
-        {/* Gender */}
-        <Text style={styles.label}>Gender</Text>
-        <View style={[styles.inputContainer, { paddingRight: 10 }]}>
-          <Ionicons name="male-female-outline" size={20} color="#666" />
-          <Picker
-            selectedValue={form.gender}
-            style={styles.picker}
-            onValueChange={(val) => setForm({ ...form, gender: val })}
+        {/* Bottom White Section */}
+        <View style={styles.bottomSection}>
+          <View style={styles.cloudContainer}>
+            {[...Array(40)].map((_, index) => {
+              const isLight = Math.random() < 0.85; // True ~50% of the time, False ~50% of the time
+              const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
+              const h = Math.random() * (80 - 48) + 48;
+              return (
+                <View
+                  key={index}
+                  style={[
+                    cloudStyle, // Apply the randomly chosen style (light or dark)
+                    {
+                      marginHorizontal: Math.random() * -24,
+                      marginVertical: Math.random() * -32,
+                      height: h,
+                      width: Math.random() * (120 - 80) + h * 1.2,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+          <View style={styles.cloudContainer2}>
+            {[...Array(40)].map((_, index) => {
+              // Determine the style randomly
+              const isLight = Math.random() < 0.75; // True ~50% of the time, False ~50% of the time
+              const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
+              const h = Math.random() * (80 - 48) + 48;
+
+              return (
+                <View
+                  key={index}
+                  style={[
+                    cloudStyle, // Apply the randomly chosen style (light or dark)
+                    {
+                      marginHorizontal: Math.random() * -24,
+                      marginVertical: Math.random() * -32,
+                      height: h,
+                      width: Math.random() * (120 - 80) + h,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+          <View style={styles.cloudContainer2}>
+            {[...Array(12)].map((_, index) => (
+              <View
+                key={index} // Keys are important for list items in React
+                style={[
+                  styles.darkCloud,
+                  {
+                    marginHorizontal: Math.random() * -24,
+                    marginVertical: Math.random() * -32,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+          <Text style={styles.title}>Sign Up</Text>
+
+          {/* Name */}
+          <Text style={styles.label}>Name</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="person-outline" size={20} color="#666" />
+            <TextInput
+              placeholder="Enter your name"
+              placeholderTextColor="#888"
+              style={styles.input}
+              value={form.name}
+              onChangeText={(val) => setForm({ ...form, name: val })}
+            />
+          </View>
+
+          {/* Email */}
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color="#666" />
+            <TextInput
+              placeholder="Enter your email"
+              placeholderTextColor="#888"
+              style={styles.input}
+              keyboardType="email-address"
+              value={form.email}
+              onChangeText={(val) => setForm({ ...form, email: val })}
+            />
+          </View>
+
+          {/* Password */}
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={20} color="#666" />
+            <TextInput
+              placeholder="Enter your password"
+              placeholderTextColor="#888"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={form.password}
+              onChangeText={(val) => setForm({ ...form, password: val })}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                size={20}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Date of Birth */}
+          <Text style={styles.label}>Date of Birth</Text>
+          <TouchableOpacity
+            style={styles.inputContainer}
+            onPress={() => setShowDatePicker(true)}
           >
-            <Picker.Item label="Male" value="Male" />
-            <Picker.Item label="Female" value="Female" />
-            <Picker.Item label="Other" value="Other" />
-          </Picker>
-        </View>
+            <Ionicons name="calendar-outline" size={20} color="#666" />
+            <Text style={[styles.input, { color: "black" }]}>
+              {form.dob.toDateString()}
+            </Text>
+          </TouchableOpacity>
 
-        {/* Sign Up Button */}
-        <TouchableOpacity onPress={handleSignup} style={styles.signupBtn}>
-          <Text style={styles.signupText}>Sign Up</Text>
-        </TouchableOpacity>
-        <View style={styles.loginButton}>
-          <Text style={{ color: "black", fontSize: 18 }}>Already have an account? </Text>
-          <Text style={styles.loginText} onPress={handleLogin}>Login</Text>
+          {showDatePicker && (
+            <DateTimePicker
+              value={form.dob}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={(_: any, selectedDate?: Date) => {
+                setShowDatePicker(false);
+                if (selectedDate) setForm({ ...form, dob: selectedDate });
+              }}
+            />
+          )}
+
+          {/* Gender */}
+          <Text style={styles.label}>Gender</Text>
+          <View style={[styles.inputContainer, { paddingRight: 10 }]}>
+            <Ionicons name="male-female-outline" size={20} color="#666" />
+            <Picker
+              selectedValue={form.gender}
+              style={styles.picker}
+              onValueChange={(val) => setForm({ ...form, gender: val })}
+            >
+              <Picker.Item label="Male" value="Male" />
+              <Picker.Item label="Female" value="Female" />
+              <Picker.Item label="Other" value="Other" />
+            </Picker>
+          </View>
+
+          {/* Sign Up Button */}
+          <TouchableOpacity onPress={handleSignup} style={styles.signupBtn}>
+            <Text style={styles.signupText}>Sign Up</Text>
+          </TouchableOpacity>
+          <View style={styles.loginButton}>
+            <Text style={{ color: "black", fontSize: 18 }}>
+              Already have an account?{" "}
+            </Text>
+            <Text style={styles.loginText} onPress={handleLogin}>
+              Login
+            </Text>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -266,10 +290,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  helpButton:{
-    color:"#fff",
-    marginLeft:"auto",
-    marginRight:13,
+  helpButton: {
+    color: "#fff",
+    marginLeft: "auto",
+    marginRight: 13,
   },
 
   bottomSection: {
@@ -335,13 +359,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     marginVertical: 12,
-    fontSize: 80
-    
+    fontSize: 80,
   },
   loginText: {
     color: "#0d6efd",
     fontSize: 18,
-    marginLeft: 6 
+    marginLeft: 6,
   },
   cloudContainer: {
     flex: 1,

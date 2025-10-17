@@ -76,7 +76,7 @@ const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
       />
       {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
       <View style={styles.lessonIconContainer}>
-        <Ionicons name="bookmark" size={16} color="#0d6efd" />{" "}
+        <Ionicons name="bookmark" size={16} color="#0d6efd" />
       </View>
 
       <View style={styles.lessonTextContainer}>

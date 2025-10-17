@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 
 import {
   Alert,
@@ -20,11 +21,14 @@ export default function Login() {
   const router = useRouter();
   const handleLogin = async () => {
     try {
-      const response = await fetch("https://tutex-vq6j.onrender.com/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username:email, password }),
-      });
+      const response = await fetch(
+        "https://tutex-vq6j.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: email, password }),
+        }
+      );
 
       if (!response.ok) {
         const err = await response.text();
@@ -34,12 +38,13 @@ export default function Login() {
 
       const data = await response.json();
       await AsyncStorage.setItem("authToken", data.body["auth_token"]);
-      console.log("hi1")
-      await AsyncStorage.setItem("userProfile", JSON.stringify(data.body["userProfile"]));
-      console.log("hi2")
-      Alert.alert("Success", "Login successful!");
-      router.replace("/(main)/(tabs)/home")
+      await AsyncStorage.setItem(
+        "userProfile",
+        JSON.stringify(data.body["userProfile"])
+      );
+      
       // redirect user here
+      router.replace("/(main)/(tabs)/home");
     } catch (error) {
       Alert.alert("Error", "Cannot connect to server");
       console.log(error);
@@ -50,127 +55,147 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top Section */}
-      <View style={styles.topSection}>
-        <TouchableOpacity onPress={()=>{router.replace("../(tutorials)/LoginTutorial")}} style={styles.helpButton}>
-          <Ionicons name="help-circle-outline" size={50} color={styles.helpButton.color}/>
-        </TouchableOpacity>
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.logoText}>Tutex</Text>
-      </View>
-
-      {/* Cloud Separator */}
-
-      {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        <View style={styles.cloudContainer}>
-          {[...Array(12)].map((_, index) => {
-            // Determine the style randomly
-            const isLight = Math.random() < 0.9; // True ~50% of the time, False ~50% of the time
-            const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
-            const h = Math.random() * (80 - 48) + 48;
-
-            return (
-              <View
-                key={index}
-                style={[
-                  cloudStyle, // Apply the randomly chosen style (light or dark)
-                  {
-                    marginHorizontal: Math.random() * -24,
-                    marginVertical: Math.random() * -32,
-                    height: h,
-                    width: Math.random() * (120 - 80) + h * 1.2,
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-        <View style={styles.cloudContainer2}>
-          {[...Array(9)].map((_, index) => {
-            // Determine the style randomly
-            const isLight = Math.random() < 0.9; // True ~50% of the time, False ~50% of the time
-            const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
-            const h = Math.random() * (80 - 48) + 48;
-
-            return (
-              <View
-                key={index}
-                style={[
-                  cloudStyle, // Apply the randomly chosen style (light or dark)
-                  {
-                    marginHorizontal: Math.random() * -24,
-                    marginVertical: Math.random() * -32,
-                    height: h,
-                    width: Math.random() * (120 - 80) + h,
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-        <View style={styles.cloudContainer2}>
-          {[...Array(8)].map((_, index) => (
-            <View
-              key={index} // Keys are important for list items in React
-              style={[
-                styles.darkCloud,
-                {
-                  marginHorizontal: Math.random() * -24,
-                  marginVertical: Math.random() * -32,
-                },
-              ]}
-            />
-          ))}
-        </View>
-        <Text style={styles.title}>Login</Text>
-
-        <Text style={styles.label}>Email</Text>
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#666" />
-          <TextInput
-            placeholder="Enter email"
-            placeholderTextColor="#888"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-
-        <Text style={styles.label}>Password</Text>
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#666" />
-          <TextInput
-            placeholder="Enter password"
-            placeholderTextColor="#888"
-            style={styles.input}
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Top Section */}
+        <View style={styles.topSection}>
+          <TouchableOpacity
+            onPress={() => {
+              router.replace("../(tutorials)/LoginTutorial");
+            }}
+            style={styles.helpButton}
+          >
             <Ionicons
-              name={showPassword ? "eye-outline" : "eye-off-outline"}
-              size={20}
-              color="#666"
+              name="help-circle-outline"
+              size={50}
+              color={styles.helpButton.color}
             />
           </TouchableOpacity>
+          <Image
+            source={require("../../assets/logo.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.logoText}>Tutex</Text>
         </View>
 
-        <TouchableOpacity onPress={handleLogin} style={styles.loginBtn}>
-          <Text style={styles.loginText}>Login</Text>
-        </TouchableOpacity>
-        <View style={styles.loginButton}>
-          <Text style={{ color: "black", fontSize: 18 }}>
-            Do not have an account?{" "}
-          </Text>
-          <Text style={styles.signupText} onPress={handleSignup}>
-            Create Account
-          </Text>
+        {/* Cloud Separator */}
+
+        {/* Bottom Section */}
+        <View style={styles.bottomSection}>
+          <View style={styles.cloudContainer}>
+            {[...Array(12)].map((_, index) => {
+              // Determine the style randomly
+              const isLight = Math.random() < 0.9; // True ~50% of the time, False ~50% of the time
+              const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
+              const h = Math.random() * (80 - 48) + 48;
+
+              return (
+                <View
+                  key={index}
+                  style={[
+                    cloudStyle, // Apply the randomly chosen style (light or dark)
+                    {
+                      marginHorizontal: Math.random() * -24,
+                      marginVertical: Math.random() * -32,
+                      height: h,
+                      width: Math.random() * (120 - 80) + h * 1.2,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+          <View style={styles.cloudContainer2}>
+            {[...Array(9)].map((_, index) => {
+              // Determine the style randomly
+              const isLight = Math.random() < 0.9; // True ~50% of the time, False ~50% of the time
+              const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
+              const h = Math.random() * (80 - 48) + 48;
+
+              return (
+                <View
+                  key={index}
+                  style={[
+                    cloudStyle, // Apply the randomly chosen style (light or dark)
+                    {
+                      marginHorizontal: Math.random() * -24,
+                      marginVertical: Math.random() * -32,
+                      height: h,
+                      width: Math.random() * (120 - 80) + h,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+          <View style={styles.cloudContainer2}>
+            {[...Array(8)].map((_, index) => (
+              <View
+                key={index} // Keys are important for list items in React
+                style={[
+                  styles.darkCloud,
+                  {
+                    marginHorizontal: Math.random() * -24,
+                    marginVertical: Math.random() * -32,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+          <Text style={styles.title}>Login</Text>
+
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color="#666" />
+            <TextInput
+              placeholder="Enter email"
+              placeholderTextColor="#888"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={20} color="#666" />
+            <TextInput
+              placeholder="Enter password"
+              placeholderTextColor="#888"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                size={20}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity onPress={handleLogin} style={styles.loginBtn}>
+            <Text style={styles.loginText}>Login</Text>
+          </TouchableOpacity>
+          <View style={styles.loginButton}>
+            <Text style={{ color: "black", fontSize: 18 }}>
+              Do not have an account?{" "}
+            </Text>
+            <Text style={styles.signupText} onPress={handleSignup}>
+              Create Account
+            </Text>
+          </View>
         </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -289,10 +314,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  
-  helpButton:{
-    color:"#fff",
-    marginLeft:"auto",
-    marginRight:13,
-  }
+
+  helpButton: {
+    color: "#fff",
+    marginLeft: "auto",
+    marginRight: 13,
+  },
 });
