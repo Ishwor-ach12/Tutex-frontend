@@ -41,14 +41,17 @@ export default function Login() {
       console.log(error);
     }
   };
-  const handleSignup = ()=>{
+  const handleSignup = () => {
     router.replace("/(auth)/Signup");
-  }
+  };
 
   return (
     <View style={styles.container}>
       {/* Top Section */}
       <View style={styles.topSection}>
+        <TouchableOpacity onPress={()=>{router.replace("/(tutorials)/LoginTutorial")}} style={styles.helpButton}>
+          <Ionicons name="help-circle-outline" size={50} color={styles.helpButton.color}/>
+        </TouchableOpacity>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.logoText}>Tutex</Text>
       </View>
@@ -282,4 +285,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  
+  helpButton:{
+    color:"#fff",
+    marginLeft:"auto",
+    marginRight:13,
+  }
 });
