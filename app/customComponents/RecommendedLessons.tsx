@@ -98,10 +98,6 @@ const RecommendedLessons = () => {
       setError(null);
 
       // Get bearer token from AsyncStorage
-      await AsyncStorage.setItem(
-        "authToken",
-        "eyJhbGciOiJIUzI1NiJ9.MTk.YS1fIZfRTv3dg4GNMwkHyEv5ICv-bxHzMPvye2E5q3g"
-      );
       const token = await AsyncStorage.getItem("authToken"); // Adjust key name as needed
 
       if (!token) {

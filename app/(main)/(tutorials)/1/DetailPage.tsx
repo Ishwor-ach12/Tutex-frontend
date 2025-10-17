@@ -1,4 +1,5 @@
 // (main-routes)/tutorial/[id].tsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -59,13 +60,13 @@ const TutorialDetail = () => {
   const fetchTutorialDetail = async () => {
     try {
       setIsLoading(true);
-
+      const token = await AsyncStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/tutorial/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           // Add authorization if needed
-          // 'Authorization': `Bearer ${yourToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
