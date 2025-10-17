@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -11,8 +13,6 @@ import {
   View,
 } from "react-native";
 import { AllCourseResponse, LESSON_CARD_WIDTH, Tutorial } from "./typesAndDimensions";
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const imageMap: Record<string, any> = {
@@ -74,7 +74,7 @@ const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
 
     {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
     <View style={styles.lessonIconContainer}>
-      <Ionicons name="bookmark" size={16} color="#0d6efd" />{" "}
+      <Ionicons name="bookmark" size={16} color="#0d6efd" />
     </View>
 
     <View style={styles.lessonTextContainer}>

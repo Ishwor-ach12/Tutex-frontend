@@ -12,15 +12,13 @@ export default function RootLayout() {
   useEffect(() => {
     const checkUserState = async () => {
       const lang = await AsyncStorage.getItem("selectedLanguage");
-      const signedup = await AsyncStorage.getItem("hasSignedup");
-      const profile = await AsyncStorage.getItem("hasProfile");
+      const signedup = await AsyncStorage.getItem("userSignedup");
+      const profile = await AsyncStorage.getItem("userProfile");
       const token = await AsyncStorage.getItem("authToken");
 
       if (!signedup || !lang) setInitialRoute("(onboarding)");
-      else if (!profile) setInitialRoute("(auth)");
-      else if (token) setInitialRoute("(main)");
+      else if (token && profile) setInitialRoute("(main)");
       else setInitialRoute("(auth)");
-      // setInitialRoute("(main)")
     };
 
     checkUserState();

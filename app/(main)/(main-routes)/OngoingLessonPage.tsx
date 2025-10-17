@@ -80,7 +80,7 @@ const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
     />
     {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
     <View style={styles.lessonIconContainer}>
-      <Ionicons name="bookmark" size={16} color="#0d6efd" />{" "}
+      <Ionicons name="bookmark" size={16} color="#0d6efd" />
     </View>
 
     <View style={styles.lessonTextContainer}>
@@ -145,7 +145,7 @@ const OngoingLessons = () => {
         image: imageMap[course.photoUrl], // Use photoUrl from API
         status: "Ongoing" as const,
       }));
-      console.log(transformedCourses);
+      // console.log(transformedCourses);
       setCourses(transformedCourses);
     } catch (err) {
       console.error("Error fetching courses:", err);
