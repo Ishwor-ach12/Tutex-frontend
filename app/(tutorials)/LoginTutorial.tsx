@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Animated,
   Dimensions,
@@ -19,6 +20,9 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function LoginTutorial() {
   const router = useRouter();
+
+  const { t} = useTranslation();
+
   const [currentStep, setCurrentStep] = useState(0);
   const [tutorialActive, setTutorialActive] = useState(true);
   const [componentPositions, setComponentPositions] = useState({});
@@ -30,31 +34,36 @@ export default function LoginTutorial() {
   const loginRef = useRef(null);
   const signupRef = useRef(null);
 
-  const tutorialSteps = [
-  {
-    key: "email",
-    title: "Your Email Address",
-    description: "This is where you type the email address you used to create your account. Your email is like your digital name that helps us recognize you.",
-    ref: emailRef
-  },
-  {
-    key: "password", 
-    title: "Your Secret Password",
-    description: "Type your secret password here. The password keeps your account safe. Tap the eye icon 👁️ to show or hide your password while typing.",
-    ref: passwordRef
-  },
-  {
-    key: "login",
-    title: "Login Button", 
-    description: "After entering your email and password, tap this blue button to enter your account. This is like unlocking the door to your personal space.",
-    ref: loginRef
-  },
-  {
-    key: "signup",
-    title: "New to Tutex?",
-    description: "If you don't have an account yet, tap here to create one. It's free and only takes a few minutes to get started with learning!",
-    ref: signupRef
-  }
+
+
+const tutorialSteps = [
+    {
+        key: "email",
+        // The key used to look up the translated Title
+        titleKey: "login_tutorial.email_title", 
+        // The key used to look up the translated Description
+        descriptionKey: "login_tutorial.email_description", 
+        ref: emailRef
+    },
+    {
+        key: "password", 
+        titleKey: "login_tutorial.password_title", 
+        descriptionKey: "login_tutorial.password_description", 
+        ref: passwordRef
+    },
+    {
+        key: "login", 
+        titleKey: "login_tutorial.login_title", 
+        descriptionKey: "login_tutorial.login_description", 
+        ref: loginRef
+    },
+    {
+        key: "signup", 
+        titleKey: "login_tutorial.signup_title", 
+        descriptionKey: "login_tutorial.signup_description", 
+        ref: passwordRef
+    },
+    
 ];
 
   useEffect(() => {
@@ -224,7 +233,7 @@ export default function LoginTutorial() {
           styles.title,
           tutorialActive && styles.dimmedText
         ]}>
-          Login
+          {t('login_tutorial.static_login_title')}
         </Text>
 
         {/* Email Input */}
@@ -311,13 +320,13 @@ export default function LoginTutorial() {
               styles.normalText,
               tutorialActive && styles.dimmedText
             ]}>
-              Do not have an account?{" "}
+              Don't have an account ? {" "}
             </Text>
             <Text style={[
               styles.signupText,
               tutorialActive && styles.dimmedText
             ]}>
-              Create Account
+              Create account
             </Text>
           </View>
         </Animated.View>
@@ -329,22 +338,22 @@ export default function LoginTutorial() {
           {/* Tooltip Arrow */}          
           <View style={styles.tooltip}>
             <Text style={styles.tooltipTitle}>
-              {tutorialSteps[currentStep].title}
+              {t(tutorialSteps[currentStep].titleKey)}
             </Text>
             <Text style={styles.tooltipDescription}>
-              {tutorialSteps[currentStep].description}
+              {t(tutorialSteps[currentStep].descriptionKey)}
             </Text>
             
             <View style={styles.tooltipButtons}>
               {currentStep > 0 && (
                 <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                  <Text style={styles.backBtnText}>Back</Text>
+                  <Text style={styles.backBtnText}>{t('login_tutorial.btn_back')}</Text>
                 </TouchableOpacity>
               )}
               
               <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
                 <Text style={styles.nextBtnText}>
-                  {currentStep === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
+                  {currentStep === tutorialSteps.length - 1 ? t('login_tutorial.btn_finish') : t('login_tutorial.btn_next')}
                 </Text>
               </TouchableOpacity>
             </View>
