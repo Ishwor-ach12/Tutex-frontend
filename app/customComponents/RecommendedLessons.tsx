@@ -132,7 +132,6 @@ const RecommendedLessons = () => {
         image: imageMap[course.photoUrl], // Use photoUrl from API
         status: "Ongoing" as const,
       }));
-      console.log(transformedCourses);
       setCourses(transformedCourses);
     } catch (err) {
       console.error("Error fetching courses:", err);

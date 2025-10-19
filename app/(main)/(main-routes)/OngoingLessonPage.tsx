@@ -14,43 +14,48 @@ import {
   View,
 } from "react-native";
 import {
-  AllCourseResponse,
   ITEM_MARGIN,
   LESSON_CARD_WIDTH_LARGE,
   NUM_COLUMNS,
-  Tutorial,
+  SubscribedCourseResonse,
 } from "../../customComponents/typesAndDimensions";
 
-const yourLessonsData: Tutorial[] = [
+const sampleData: transformedCourse[] = [
   {
-    id: "1",
-    title: "Web Development Basics",
-    lessons: 5,
-    image: require("../../../assets/amazon.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "1",
-    title: "Data Structures 101",
-    lessons: 3,
+    assignmentId: 18,
+    status: "pending",
+    courseId: 4,
+    title: "WhatsApp",
     image: require("../../../assets/whatsapp.png"),
-    status: "Ongoing",
+    slug: "Social-Media-Online-Call-WhatsApp",
   },
   {
-    id: "1",
-    title: "Mobile App Design",
-    lessons: 8,
-    image: require("../../../assets/uber.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "1",
-    title: "Advanced React Native",
-    lessons: 2,
+    assignmentId: 19,
+    status: "pending",
+    courseId: 1,
+    title: "UPI Payment",
     image: require("../../../assets/phonepeBanner.png"),
-    status: "Ongoing",
+    slug: "UPI-Payment-phonepe-paytm",
+  },
+  {
+    assignmentId: 20,
+    status: "pending",
+    courseId: 3,
+    title: "Amazon Shopping",
+    image: require("../../../assets/amazon.png"),
+    slug: "amazon-shopping-ecommerce",
   },
 ];
+
+type transformedCourse = {
+  assignmentId: number;
+  status: string;
+  courseId: number;
+  title: string;
+  image: number;
+  slug: string;
+};
+
 const imageMap: Record<string, any> = {
   "phonepeBanner.png": require("../../../assets/phonepeBanner.png"),
   "amazon.png": require("../../../assets/amazon.png"),
@@ -60,40 +65,49 @@ const imageMap: Record<string, any> = {
   "instagram.png": require("../../../assets/instagram.png"),
   "flipkart.png": require("../../../assets/flipkart.png"),
 };
-const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
+const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
   const router = useRouter();
   return (
-<TouchableOpacity
+    <TouchableOpacity
       style={styles.lessonCard}
       onPress={() =>
         router.push({
-          pathname: "/(main)/(tutorials)/[id]/LessonPage",
-          params: { id: String(item.id) },
+          pathname: `/(main)/(tutorials)/LessonPage`,
+          params: { courseId: String(item.courseId), assignmentId: String(item.assignmentId) },
         } as any)
       }
     >
-        {/* Placeholder for the gradient/image */}
-    <Image source={item.image} style={styles.cardImage} />
-    <LinearGradient
-      colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.9)"]} // Transparent at top, solid black at bottom
-      style={styles.gradientOverlay}
-    />
-    {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
-    <View style={styles.lessonIconContainer}>
-      <Ionicons name="bookmark" size={16} color="#0d6efd" />
-    </View>
+      {/* Placeholder for the gradient/image */}
+      <Image source={item.image} style={styles.cardImage} />
+      <LinearGradient
+        colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.9)"]} // Transparent at top, solid black at bottom
+        style={styles.gradientOverlay}
+      />
+      {/* Icon at top right (using Emoji instead of Ionicons to resolve module error) */}
+      <View style={styles.lessonIconContainer}>
+        <Ionicons name="bookmark" size={16} color="#0d6efd" />
+      </View>
 
-    <View style={styles.lessonTextContainer}>
-      <Text style={styles.lessonTitle}>{item.title}</Text>
-      <TouchableOpacity style={styles.continueButton}>
-        <Text style={styles.continueButtonText}>Continue</Text>
-      </TouchableOpacity>
-    </View>
-  </TouchableOpacity>
-)}
+      <View style={styles.lessonTextContainer}>
+        <Text style={styles.lessonTitle}>{item.title}</Text>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={() =>
+            router.push({
+              pathname: `/(main)/(tutorials)/LessonPage`,
+              params: {courseId: String(item.courseId), assignmentId: String(item.assignmentId) },
+            } as any)
+          }
+        >
+          <Text style={styles.continueButtonText}>Continue</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const OngoingLessons = () => {
-  const [courses, setCourses] = useState<Tutorial[]>(yourLessonsData);
+  const [courses, setCourses] = useState<transformedCourse[]>(sampleData);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,13 +129,13 @@ const OngoingLessons = () => {
 
       if (!token) {
         console.warn("No auth token found, using fallback data");
-        setCourses(yourLessonsData);
+        setCourses(sampleData);
         setLoading(false);
         return;
       }
 
       const response = await fetch(
-        "https://tutex-vq6j.onrender.com/tutorial/all",
+        "https://tutex-vq6j.onrender.com/user/tutorial/all",
         {
           method: "GET",
           headers: {
@@ -135,46 +149,41 @@ const OngoingLessons = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: AllCourseResponse = await response.json();
+      const data: SubscribedCourseResonse = await response.json();
 
       // Transform API response to Tutorial format
-      const transformedCourses: Tutorial[] = data.body.map((course) => ({
-        id: course.courseId.toString(),
-        title: course.title,
-        lessons: 0, // API doesn't provide lesson count, set default or fetch separately
-        image: imageMap[course.photoUrl], // Use photoUrl from API
-        status: "Ongoing" as const,
-      }));
-      // console.log(transformedCourses);
+      const transformedCourses: transformedCourse[] = data.body.map(
+        (course) => ({
+          assignmentId: course.assignmentId,
+          courseId: course.courseId,
+          slug: course.slug,
+          title: course.title,
+          image: imageMap[course.photoUrl], // Use photoUrl from API
+          status: "Ongoing" as const,
+        })
+      );
       setCourses(transformedCourses);
     } catch (err) {
       console.error("Error fetching courses:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch courses");
       // Keep fallback data on error
-      setCourses(yourLessonsData);
+      setCourses(sampleData);
     } finally {
       setLoading(false);
     }
   };
-  const router = useRouter();
-  const handleSeeAll = () => {
-    // Assuming you have a route like 'all-lessons' or similar
-    router.push("/");
-    // If 'all-lessons' is a screen within your tabs, use: router.push('/(tabs)/all-lessons');
-    // Adjust the path to match your file-based routing structure.
-  };
-  const renderYourLessonCard = ({ item }: ListRenderItemInfo<Tutorial>) => (
-    <LessonCard item={item} />
-  );
+  const renderYourLessonCard = ({
+    item,
+  }: ListRenderItemInfo<transformedCourse>) => <LessonCard item={item} />;
   return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: "white" }}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Ongoing Lessons</Text>
       </View>
       <FlatList
         data={courses}
         renderItem={renderYourLessonCard}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.courseId.toString()}
         numColumns={NUM_COLUMNS}
         scrollEnabled={false} // Important: Disable internal scrolling to allow the parent ScrollView to handle it
         columnWrapperStyle={styles.exploreColumnWrapper}

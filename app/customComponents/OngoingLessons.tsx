@@ -13,41 +13,9 @@ import {
   View,
 } from "react-native";
 import {
-  AllCourseResponse,
   LESSON_CARD_WIDTH,
-  Tutorial,
+  SubscribedCourseResonse,
 } from "./typesAndDimensions";
-
-const yourLessonsData: Tutorial[] = [
-  {
-    id: "yl1",
-    title: "Web Development Basics",
-    lessons: 5,
-    image: require("../../assets/amazon.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "yl2",
-    title: "Data Structures 101",
-    lessons: 3,
-    image: require("../../assets/whatsapp.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "yl3",
-    title: "Mobile App Design",
-    lessons: 8,
-    image: require("../../assets/uber.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "yl4",
-    title: "Advanced React Native",
-    lessons: 2,
-    image: require("../../assets/phonepeBanner.png"),
-    status: "Ongoing",
-  },
-];
 
 const imageMap: Record<string, any> = {
   "phonepeBanner.png": require("../../assets/phonepeBanner.png"),
@@ -56,15 +24,42 @@ const imageMap: Record<string, any> = {
   "whatsapp.png": require("../../assets/whatsapp.png"),
 };
 
-const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
+const sampleData: transformedCourse[] = [
+  {
+    assignmentId: 18,
+    status: "pending",
+    courseId: 4,
+    title: "WhatsApp",
+    image: require("../../assets/whatsapp.png"),
+    slug: "Social-Media-Online-Call-WhatsApp",
+  },
+  {
+    assignmentId: 19,
+    status: "pending",
+    courseId: 1,
+    title: "UPI Payment",
+    image: require("../../assets/phonepeBanner.png"),
+    slug: "UPI-Payment-phonepe-paytm",
+  },
+];
+
+type transformedCourse = {
+  assignmentId: number;
+  status: string;
+  courseId: number;
+  title: string;
+  image: number;
+  slug: string;
+};
+const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
   const router = useRouter();
   return (
     <TouchableOpacity
       style={styles.lessonCard}
       onPress={() =>
         router.push({
-          pathname: "/(main)/(tutorials)/[id]/LessonPage",
-          params: { id: String(item.id) },
+              pathname: `/(main)/(tutorials)/LessonPage`,
+              params: {courseId: String(item.courseId), assignmentId: String(item.assignmentId) },
         } as any)
       }
     >
@@ -81,7 +76,15 @@ const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
 
       <View style={styles.lessonTextContainer}>
         <Text style={styles.lessonTitle}>{item.title}</Text>
-        <TouchableOpacity style={styles.continueButton}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={() =>
+            router.push({
+              pathname: `/(main)/(tutorials)/LessonPage`,
+              params: {courseId: String(item.courseId), assignmentId: String(item.assignmentId) },
+            } as any)
+          }
+        >
           <Text style={styles.continueButtonText}>Continue</Text>
         </TouchableOpacity>
       </View>
@@ -90,7 +93,7 @@ const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
 };
 
 const OngoingLessons = () => {
-  const [courses, setCourses] = useState<Tutorial[]>(yourLessonsData);
+  const [courses, setCourses] = useState<transformedCourse[]>(sampleData);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,13 +111,12 @@ const OngoingLessons = () => {
 
       if (!token) {
         console.warn("No auth token found, using fallback data");
-        setCourses(yourLessonsData);
         setLoading(false);
         return;
       }
 
       const response = await fetch(
-        "https://tutex-vq6j.onrender.com/tutorial/all",
+        "https://tutex-vq6j.onrender.com/user/tutorial/all",
         {
           method: "GET",
           headers: {
@@ -128,23 +130,25 @@ const OngoingLessons = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: AllCourseResponse = await response.json();
+      const data: SubscribedCourseResonse = await response.json();
 
       // Transform API response to Tutorial format
-      const transformedCourses: Tutorial[] = data.body.map((course) => ({
-        id: course.courseId.toString(),
-        title: course.title,
-        lessons: 0, // API doesn't provide lesson count, set default or fetch separately
-        image: imageMap[course.photoUrl], // Use photoUrl from API
-        status: "Ongoing" as const,
-      }));
-      console.log(transformedCourses);
+      const transformedCourses: transformedCourse[] = data.body.map(
+        (course) => ({
+          assignmentId: course.assignmentId,
+          courseId: course.courseId,
+          title: course.title,
+          image: imageMap[course.photoUrl], // Use photoUrl from API
+          status: "Ongoing" as const,
+          slug: course.slug,
+        })
+      );
       setCourses(transformedCourses);
     } catch (err) {
       console.error("Error fetching courses:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch courses");
       // Keep fallback data on error
-      setCourses(yourLessonsData);
+      setCourses(sampleData);
     } finally {
       setLoading(false);
     }
@@ -157,9 +161,9 @@ const OngoingLessons = () => {
     // If 'all-lessons' is a screen within your tabs, use: router.push('/(tabs)/all-lessons');
     // Adjust the path to match your file-based routing structure.
   };
-  const renderYourLessonCard = ({ item }: ListRenderItemInfo<Tutorial>) => (
-    <LessonCard item={item} />
-  );
+  const renderYourLessonCard = ({
+    item,
+  }: ListRenderItemInfo<transformedCourse>) => <LessonCard item={item} />;
   return (
     <>
       <View style={styles.sectionHeader}>
@@ -171,7 +175,7 @@ const OngoingLessons = () => {
       <FlatList
         data={courses}
         renderItem={renderYourLessonCard}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.assignmentId.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.lessonsListContainer}
