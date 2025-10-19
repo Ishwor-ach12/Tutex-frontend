@@ -4,6 +4,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Animated,
   Dimensions,
@@ -31,6 +32,8 @@ export default function SignupTutorial() {
   };
 
   const router = useRouter();
+  const { t} = useTranslation();
+
   const [currentStep, setCurrentStep] = useState(0);
   const [tutorialActive, setTutorialActive] = useState(true);
   const [componentPositions, setComponentPositions] = useState({});
@@ -60,44 +63,44 @@ export default function SignupTutorial() {
   const tutorialSteps = [
     {
       key: "name",
-      title: "Your Full Name",
-      description: "Type your full name here exactly as you want it to appear in your account. This helps personalize your learning experience.",
+      titleKey: "signup_tutorial.name_title",
+      descriptionKey: "signup_tutorial.name_description",
       ref: nameRef
     },
     {
       key: "email",
-      title: "Your Email Address",
-      description: "Enter your email address here. Make sure it's an email you can access, as we may send important information to this address.",
+      titleKey: "signup_tutorial.email_title",
+      descriptionKey: "signup_tutorial.email_description",
       ref: emailRef
     },
     {
       key: "password", 
-      title: "Create a Password",
-      description: "Create a strong password that you can remember. For safety, your password will appear as dots ••••••. Tap the eye icon 👁️ if you want to see what you're typing.",
+      titleKey: "singup_tutorial.password_title",
+      descriptionKey: "signup_tutorial.password_description",
       ref: passwordRef
     },
     {
       key: "dob",
-      title: "Your Birth Date",
-      description: "Tap here to select your date of birth. This helps us provide age-appropriate content and keep your account secure.",
+      titleKey: "signup_tutorial.dob_title",
+      descriptionKey: "signup_tutorial.dob_description",
       ref: dobRef
     },
     {
       key: "gender",
-      title: "Select Gender",
-      description: "Choose your gender from the options. This information helps us better understand our community's needs.",
+      titleKey: "signup_tutorial.gender_title",
+      descriptionKey: "signup_tutorial.gender_description",
       ref: genderRef
     },
     {
       key: "signup",
-      title: "Create Your Account", 
-      description: "When you've filled all the information, tap this blue button to create your account and start learning!",
+      titleKey: "signup_tutorial.signup_title", 
+      descriptionKey: "signup_tutorial.signup_description",
       ref: signupRef
     },
     {
       key: "login",
-      title: "Already Registered?",
-      description: "If you already have an account, tap here to go back to the login page and access your account.",
+      titleKey: "singup_tutorial.login_title",
+      descriptionKey: "signup_tutorial.login_description",
       ref: loginRef
     }
   ];
@@ -307,27 +310,7 @@ export default function SignupTutorial() {
           styles.bottomSection, 
           tutorialActive && styles.dimmedSection
         ]}>
-          {/* <View style={styles.cloudContainer}>
-            {[...Array(40)].map((_, index) => {
-              const isLight = Math.random() < 0.85;
-              const cloudStyle = isLight ? styles.lightCloud : styles.darkCloud;
-              const h = Math.random() * (80 - 48) + 48;
-              return (
-                <View
-                  key={index}
-                  style={[
-                    cloudStyle,
-                    {
-                      marginHorizontal: Math.random() * -24,
-                      marginVertical: Math.random() * -32,
-                      height: h,
-                      width: Math.random() * (120 - 80) + h * 1.2,
-                    },
-                  ]}
-                />
-              );
-            })}
-          </View> */}
+          
           
           <Text style={[
             styles.title,
@@ -546,22 +529,22 @@ export default function SignupTutorial() {
           
           <View style={styles.tooltip}>
             <Text style={styles.tooltipTitle}>
-              {tutorialSteps[currentStep].title}
+              {t(tutorialSteps[currentStep].titleKey)}
             </Text>
             <Text style={styles.tooltipDescription}>
-              {tutorialSteps[currentStep].description}
+              {t(tutorialSteps[currentStep].descriptionKey)}
             </Text>
             
             <View style={styles.tooltipButtons}>
               {currentStep > 0 && (
                 <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                  <Text style={styles.backBtnText}>Back</Text>
+                  <Text style={styles.backBtnText}>{t('signup_tutorial.btn_back')}</Text>
                 </TouchableOpacity>
               )}
               
               <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
                 <Text style={styles.nextBtnText}>
-                  {currentStep === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
+                  {currentStep === tutorialSteps.length - 1 ?  t('login_tutorial.btn_finish') : t('login_tutorial.btn_next')}
                 </Text>
               </TouchableOpacity>
             </View>

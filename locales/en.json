@@ -1,0 +1,43 @@
+{
+  "login_tutorial": {
+    "email_title": "Your Email Address",
+    "email_description": "This is where you type the email address you used to create your account. Your email is like your digital name that helps us recognize you.",
+    "password_title": "Your Secret Password",
+    "password_description": "Type your secret password here. The password keeps your account safe. Tap the eye icon 👁️ to show or hide your password while typing.",
+    "login_title": "Login Button",
+    "login_description": "After entering your email and password, tap this blue button to enter your account.",
+    "signup_title": "New to Tutex?",
+    "signup_description": "If you don't have an account yet, tap here to create one. It's free and only takes a few minutes to get started with learning",
+    
+    "btn_back": "Back",
+    "btn_next": "Next",
+    "btn_finish": "Finish"
+  },
+
+  "signup_tutorial": {
+    "name_title": "Your Full Name",
+    "name_description": "Type your full name here exactly as you want it to appear in your account. This helps personalize your learning experience.",
+    
+    "email_title": "Your Email Address",
+    "email_description": "Enter your email address here. Make sure it's an email you can access, as we may send important information to this address.",
+    
+    "password_title": "Create a Password",
+    "password_description": "Create a strong password that you can remember. For safety, your password will appear as dots ••••••. Tap the eye icon 👁️ if you want to see what you're typing.",
+    
+    "dob_title": "Your Birth Date",
+    "dob_description": "Tap here to select your date of birth. This helps us provide age-appropriate content and keep your account secure.",
+    
+    "gender_title": "Select Gender",
+    "gender_description": "Choose your gender from the options. This information helps us better understand our community's needs.",
+    
+    "signup_title": "Create Your Account",
+    "signup_description": "When you've filled all the information, tap this blue button to create your account and start learning!",
+    
+    "login_title": "Already Registered?",
+    "login_description": "If you already have an account, tap here to go back to the login page and access your account.",
+    
+    "btn_back": "Back",
+    "btn_next": "Next",
+    "btn_finish": "Finish"
+  }
+}
