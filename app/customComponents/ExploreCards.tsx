@@ -13,45 +13,46 @@ import {
 } from "react-native";
 import {
   AllCourseResponse,
+  Course,
   EXPLORE_ITEM_WIDTH,
   ITEM_MARGIN,
-  NUM_COLUMNS,
-  Tutorial
+  NUM_COLUMNS
 } from "./typesAndDimensions";
 
-
-
-
-const exploreData: Tutorial[] = [
-  {
-    id: "yl1",
-    title: "Web Development Basics",
-    lessons: 5,
-    image: require("../../assets/instagram.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "yl2",
-    title: "Data Structures 101",
-    lessons: 3,
-    image: require("../../assets/amazon.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "yl3",
-    title: "Mobile App Design",
-    lessons: 8,
-    image: require("../../assets/facebook.png"),
-    status: "Ongoing",
-  },
-  {
-    id: "yl4",
-    title: "Advanced React Native",
-    lessons: 2,
-    image: require("../../assets/phonepeBanner.png"),
-    status: "Ongoing",
-  },
-];
+const exploreData: Course[] = [
+        {
+            "courseId": 1,
+            "title": "UPI Payment",
+            "photoUrl": "phonepeBanner.png",
+            "slug": "UPI-Payment-phonepe-paytm",
+            "createdAt": "2025-04-12T17:08:54.000Z",
+            "updatedAt": "2025-04-12T17:08:54.000Z"
+        },
+        {
+            "courseId": 2,
+            "title": "Amazon Online Shopping",
+            "photoUrl": "amazon.png",
+            "slug": "Online-Shopping-Amazon-Flipkart",
+            "createdAt": "2025-04-29T18:00:17.000Z",
+            "updatedAt": "2025-04-29T18:00:17.000Z"
+        },
+        {
+            "courseId": 3,
+            "title": "Uber Booking",
+            "photoUrl": "uber.png",
+            "slug": "Online-Booking-Auto-Cab-Bike-Uber",
+            "createdAt": "2025-04-29T18:03:56.000Z",
+            "updatedAt": "2025-04-29T18:03:56.000Z"
+        },
+        {
+            "courseId": 4,
+            "title": "WhatsApp",
+            "photoUrl": "whatsapp.png",
+            "slug": "Social-Media-Online-Call-WhatsApp",
+            "createdAt": "2025-04-29T18:06:18.000Z",
+            "updatedAt": "2025-04-29T18:06:18.000Z"
+        }
+    ];
 
 const imageMap: Record<string, any> = {
   "phonepeBanner.png": require("../../assets/phonepeBanner.png"),
@@ -60,36 +61,35 @@ const imageMap: Record<string, any> = {
   "whatsapp.png": require("../../assets/whatsapp.png"),
 };
 
-const ExploreCard: React.FC<{ item: Tutorial }> = ({ item }) => {
-  const router = useRouter(); // ✅ hook at top level
+const ExploreCard: React.FC<{ item: Course }> = ({ item }) => {
+  const router = useRouter();
 
   return (
     <TouchableOpacity
       style={[styles.exploreCard, { width: EXPLORE_ITEM_WIDTH }]}
       onPress={() =>
         router.push({
-          pathname: "/(main)/(tutorials)/[id]/DetailsPage",
-          params: { id: String(item.id) },
+          pathname: "/(main)/(tutorials)/DetailPage",
+          params: {courseId: String(item.courseId)}
         } as any)}
     >
-      <Image source={item.image} style={styles.cardImage} />
+      <Image source={imageMap[item.photoUrl]} style={styles.cardImage} />
       <LinearGradient
         colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.9)"]}
         style={styles.gradientOverlay}
       />
       <View style={styles.exploreTextContainer}>
         <Text style={styles.exploreTitle}>{item.title}</Text>
-        <Text style={styles.exploreLessons}>Lessons: {item.lessons}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
 const ExploreCards = () => {
-  const renderExploreCard = ({ item }: ListRenderItemInfo<Tutorial>) => (
+  const renderExploreCard = ({ item }: ListRenderItemInfo<Course>) => (
     <ExploreCard item={item} />
   );
-  const [courses, setCourses] = useState<Tutorial[]>(exploreData);
+  const [courses, setCourses] = useState<Course[]>(exploreData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -128,17 +128,7 @@ const ExploreCards = () => {
       }
 
       const data: AllCourseResponse = await response.json();
-
-      // Transform API response to Tutorial format
-      const transformedCourses: Tutorial[] = data.body.map((course) => ({
-        id: course.courseId.toString(),
-        title: course.title,
-        lessons: 0, // API doesn't provide lesson count, set default or fetch separately
-        image: imageMap[course.photoUrl], // Use photoUrl from API
-        status: "Ongoing" as const,
-      }));
-      console.log(transformedCourses);
-      setCourses(transformedCourses);
+      setCourses(data.body);
     } catch (err) {
       console.error("Error fetching courses:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch courses");
@@ -157,7 +147,7 @@ const ExploreCards = () => {
       <FlatList
         data={courses}
         renderItem={renderExploreCard}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.courseId.toString()}
         numColumns={NUM_COLUMNS}
         scrollEnabled={false} // Important: Disable internal scrolling to allow the parent ScrollView to handle it
         columnWrapperStyle={styles.exploreColumnWrapper}
@@ -208,18 +198,13 @@ const styles = StyleSheet.create({
   },
   exploreTextContainer: {
     position: "absolute",
-    bottom: 10,
-    left: 10,
+    bottom: 20,
+    left: 12,
   },
   exploreTitle: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  exploreLessons: {
-    color: "white",
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 20,
+    fontWeight: "semibold",
   },
 });
 export default ExploreCards;

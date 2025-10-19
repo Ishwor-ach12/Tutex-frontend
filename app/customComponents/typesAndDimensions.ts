@@ -22,6 +22,19 @@ export interface Course {
   createdAt: string;
   updatedAt: string;
 }
+export interface SubscribedCourseResonse {
+  message: string;
+  body: SubscribedCourse[];
+}
+
+export interface SubscribedCourse {
+  assignmentId: number,
+  status: string,
+  courseId: number;
+  title: string;
+  photoUrl: string;
+  slug: string;
+}
 
 // --- Dimension Calculations ---
 const { width } = Dimensions.get('window');
