@@ -233,7 +233,7 @@ const tutorialSteps = [
           styles.title,
           tutorialActive && styles.dimmedText
         ]}>
-          {t('login_tutorial.static_login_title')}
+          Login
         </Text>
 
         {/* Email Input */}
