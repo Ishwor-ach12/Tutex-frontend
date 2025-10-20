@@ -69,7 +69,7 @@ const ExploreCard: React.FC<{ item: Course }> = ({ item }) => {
       style={[styles.exploreCard, { width: EXPLORE_ITEM_WIDTH }]}
       onPress={() =>
         router.push({
-          pathname: "/(main)/(tutorials)/DetailPage",
+          pathname: "/(main)/(main-routes)/DetailPage",
           params: {courseId: String(item.courseId)}
         } as any)}
     >

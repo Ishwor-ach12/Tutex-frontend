@@ -1,7 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export interface Lesson {
   lessonId: number;
@@ -13,7 +20,7 @@ export interface Lesson {
 interface ModuleItem {
   name: string;
   displayName: string;
-  status: 'completed' | 'incomplete';
+  status: "completed" | "incomplete";
 }
 
 const LessonDetailPage = () => {
@@ -25,12 +32,12 @@ const LessonDetailPage = () => {
   useEffect(() => {
     const fetchLesson = async () => {
       try {
-        const storedLesson = await AsyncStorage.getItem('selectedLesson');
+        const storedLesson = await AsyncStorage.getItem("selectedLesson");
         if (storedLesson) {
-          setLesson(JSON.parse(storedLesson));
+          setLesson(await JSON.parse(storedLesson));
         }
       } catch (error) {
-        console.error('Error fetching lesson:', error);
+        console.error("Error fetching lesson:", error);
       } finally {
         setLoading(false);
       }
@@ -38,8 +45,7 @@ const LessonDetailPage = () => {
     fetchLesson();
   }, []);
 
-
-    const calculateProgressPercentage = (progressString: string): number => {
+  const calculateProgressPercentage = (progressString: string): number => {
     if (!progressString) return 0;
     const total = progressString.length;
     const completed = progressString
@@ -53,38 +59,40 @@ const LessonDetailPage = () => {
 
     return [
       {
-        name: 'walkthrough',
-        displayName: 'Walkthrough',
-        status: lesson.progress[0] == '1' ? 'completed' : 'incomplete',
+        name: "walkthrough",
+        displayName: "Walkthrough",
+        status: lesson.progress[0] == "1" ? "completed" : "incomplete",
       },
       {
-        name: 'practice',
-        displayName: 'Practice',
-        status: lesson.progress[1] =='1' ? 'completed' : 'incomplete',
+        name: "practice",
+        displayName: "Practice",
+        status: lesson.progress[1] == "1" ? "completed" : "incomplete",
       },
       {
-        name: 'assessment',
-        displayName: 'Assessment',
-        status: lesson.progress[2] == '1' ? 'completed' : 'incomplete',
+        name: "assessment",
+        displayName: "Assessment",
+        status: lesson.progress[2] == "1" ? "completed" : "incomplete",
       },
     ];
   };
 
-  const handleModulePress = (moduleName: string) => {
+  const handleModulePress =async (moduleName: string) => {
+    const loadLesson = {courseId, assignmentId, lessonId, moduleName};
+    await AsyncStorage.setItem("loadedLesson", JSON.stringify(loadLesson))
     router.push(
-      `/(main)/tutorials/${courseId}/lessons/${lessonId}/${moduleName}` as any
+      `/(tutorials)/${courseId}/lessons/${lessonId}/${moduleName}/LandingPage` as any
     );
   };
 
   const handleNextLesson = async () => {
     const nextLessonId = parseInt(lessonId as string) + 1;
-    
+
     // // Check if there's a next lesson in AsyncStorage
     // // You might want to store the total lesson count or list of lessons
     // try {
     //   const totalLessonsStr = await AsyncStorage.getItem('totalLessons');
     //   const totalLessons = totalLessonsStr ? parseInt(totalLessonsStr) : null;
-      
+
     //   if (totalLessons && nextLessonId > totalLessons) {
     //     // Last lesson - navigate back to course or show completion
     //     alert('Congratulations! You have completed all lessons.');
@@ -97,7 +105,7 @@ const LessonDetailPage = () => {
 
     // Navigate to next lesson
     router.push(
-      `/(main)/(tutorials)/LessonDetailPage?courseId=${courseId}&assignmentId=${assignmentId}&lessonId=${nextLessonId}` as any
+      `/(main)/(main-routes)/LessonDetailPage?courseId=${courseId}&assignmentId=${assignmentId}&lessonId=${nextLessonId}` as any
     );
   };
 
@@ -152,7 +160,7 @@ const LessonDetailPage = () => {
               <Text style={styles.moduleName}>{module.displayName}</Text>
             </View>
             <View style={styles.moduleStatus}>
-              {module.status === 'completed' ? (
+              {module.status === "completed" ? (
                 <View style={styles.completedIcon}>
                   <Text style={styles.checkmark}>✓</Text>
                 </View>
@@ -192,63 +200,63 @@ const LessonDetailPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: "#F0F0F0",
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F0F0F0',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F0F0F0",
   },
   errorText: {
     fontSize: 16,
-    color: '#E53935',
+    color: "#E53935",
   },
   headerContainer: {
-    backgroundColor: '#E8E8E8',
+    backgroundColor: "#E8E8E8",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
   },
   lessonNumber: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
     marginBottom: 8,
   },
   lessonTitle: {
     fontSize: 24,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
   },
   lessonDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 16,
   },
   progressBarContainer: {
     height: 6,
-    backgroundColor: '#D0D0D0',
+    backgroundColor: "#D0D0D0",
     borderRadius: 3,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressBarFill: {
-    height: '100%',
-    backgroundColor: '#4CAF50',
+    height: "100%",
+    backgroundColor: "#4CAF50",
     borderRadius: 3,
   },
   modulesContainer: {
     padding: 16,
   },
   moduleCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 1,
@@ -262,12 +270,12 @@ const styles = StyleSheet.create({
   },
   moduleName: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
   },
   moduleScore: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
     marginTop: 2,
   },
   moduleStatus: {
@@ -277,33 +285,33 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#4CAF50",
+    justifyContent: "center",
+    alignItems: "center",
   },
   checkmark: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   incompleteIcon: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#D0D0D0',
-    backgroundColor: '#FFF',
+    borderColor: "#D0D0D0",
+    backgroundColor: "#FFF",
   },
   nextLessonContainer: {
     paddingHorizontal: 16,
     marginBottom: 24,
   },
   nextLessonButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
     paddingVertical: 14,
     borderRadius: 8,
-    alignItems: 'center',
-    shadowColor: '#2196F3',
+    alignItems: "center",
+    shadowColor: "#2196F3",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -313,9 +321,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   nextLessonButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   analyticsContainer: {
     paddingHorizontal: 16,
@@ -323,21 +331,21 @@ const styles = StyleSheet.create({
   },
   analyticsTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 16,
   },
   analyticsPlaceholder: {
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 8,
     padding: 40,
     minHeight: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   analyticsPlaceholderText: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
   },
 });
 
