@@ -60,7 +60,7 @@ const LessonCard: React.FC<{ item: Tutorial }> = ({ item }) => {
         style={styles.lessonCard}
         onPress={() =>
           router.push({
-            pathname: "/(main)/(tutorials)/[id]/LessonPage",
+            pathname: "/(main)/(main-routes)/[id]/LessonPage",
             params: { id: String(item.id) },
           } as any)
         }

@@ -138,7 +138,7 @@ const DetailPage = () => {
       const data = await response.json();
       const assignmentId = data.body.assignmentId;
       router.push({
-        pathname: `/(main)/(tutorials)/LessonPage`,
+        pathname: `/(main)/(main-routes)/LessonPage`,
         params: {
           courseId: String(courseId),
           assignmentId: String(assignmentId),

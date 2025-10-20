@@ -134,7 +134,7 @@ const TutorialDetailPage = () => {
   const handleLessonPress = async (lesson: Lesson) => {
     await AsyncStorage.setItem("selectedLesson", JSON.stringify(lesson));
     router.push({
-      pathname: `/(main)/(tutorials)/LessonDetailPage`,
+      pathname: `/(main)/(main-routes)/LessonDetailPage`,
       params: { courseId: String(courseId), assignmentId: String(assignmentId), lessonId: String(lesson.lessonId) },
     } as any);
   };

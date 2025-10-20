@@ -72,7 +72,7 @@ const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
       style={styles.lessonCard}
       onPress={() =>
         router.push({
-          pathname: `/(main)/(tutorials)/LessonPage`,
+          pathname: `/(main)/(main-routes)/LessonPage`,
           params: { courseId: String(item.courseId), assignmentId: String(item.assignmentId) },
         } as any)
       }
@@ -94,7 +94,7 @@ const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
           style={styles.continueButton}
           onPress={() =>
             router.push({
-              pathname: `/(main)/(tutorials)/LessonPage`,
+              pathname: `/(main)/(main-routes)/LessonPage`,
               params: {courseId: String(item.courseId), assignmentId: String(item.assignmentId) },
             } as any)
           }
