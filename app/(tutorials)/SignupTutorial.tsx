@@ -75,7 +75,7 @@ export default function SignupTutorial() {
     },
     {
       key: "password", 
-      titleKey: "singup_tutorial.password_title",
+      titleKey: "signup_tutorial.password_title",
       descriptionKey: "signup_tutorial.password_description",
       ref: passwordRef
     },
@@ -99,7 +99,7 @@ export default function SignupTutorial() {
     },
     {
       key: "login",
-      titleKey: "singup_tutorial.login_title",
+      titleKey: "signup_tutorial.login_title",
       descriptionKey: "signup_tutorial.login_description",
       ref: loginRef
     }
