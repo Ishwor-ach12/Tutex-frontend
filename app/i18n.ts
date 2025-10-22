@@ -1,9 +1,9 @@
 // src/i18n.js
 
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization'; // Or react-native-localize
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
 
 // 1. IMPORT YOUR TRANSLATION FILES
 import en from '../locales/en.json';
@@ -35,7 +35,7 @@ const languageDetector = {
       console.error("Error fetching language from storage", error);
     }
     // 2. Fallback: Use device's locale (if no saved language)
-    return callback(Localization.locale.split('-')[0]); 
+    return callback(Localization.locale?.split('-')[0]); 
   },
   init: () => {},
   cacheUserLanguage: (language) => {
