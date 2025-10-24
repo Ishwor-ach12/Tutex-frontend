@@ -3,12 +3,11 @@ import { SYSTEM_PROMPTS } from "@/constants/System-Prompts";
 import { GoogleGenAI } from "@google/genai";
 import * as Speak from "expo-speech";
 import {
-    ExpoSpeechRecognitionModule,
-    useSpeechRecognitionEvent,
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { useEffect, useRef, useState } from "react";
 
-import { GEMINI_KEY } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TouchableOpacity } from "react-native";
 import { AIAgentIcon, AgentState } from "./AIAgentIcon";
@@ -48,7 +47,7 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
 
   //initiaize elements
   useEffect(() => {
-    aiRef.current = new GoogleGenAI({ apiKey: GEMINI_KEY });
+    aiRef.current = new GoogleGenAI({ apiKey: process.env.EXPO_PUBLIC_GEMINI_KEY });
     (async () =>{
       language.current = await AsyncStorage.getItem("user-language")as string
       agentResponse.current = {text:langMap[language.current][2],highlight:"null"};
@@ -120,7 +119,7 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
       parts: [{ text: textRef.current }],
     });
 
-    if (!aiRef.current) aiRef.current = new GoogleGenAI({apiKey:GEMINI_KEY});
+    if (!aiRef.current) aiRef.current = new GoogleGenAI({apiKey:process.env.EXPO_PUBLIC_GEMINI_KEY});
 
     try {
       const response = await aiRef.current.models.generateContent({
