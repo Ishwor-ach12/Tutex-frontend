@@ -16,9 +16,10 @@ export default function RootLayout() {
       const profile = await AsyncStorage.getItem("userProfile");
       const token = await AsyncStorage.getItem("authToken");
 
-      if (!signedup || !lang) setInitialRoute("(onboarding)");
-      else if (token && profile) setInitialRoute("(main)");
-      else setInitialRoute("(auth)");
+      // if (!lang) setInitialRoute("(onboarding)");
+      // else if (token && profile) setInitialRoute("(main)");
+      // else setInitialRoute("(auth)");
+      setInitialRoute("(main)")
     };
 
     checkUserState();
