@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,6 +21,8 @@ export interface UserProfileType {
 const handlePress = (title: string) => {
   console.log(`Action: ${title} pressed`);
 };
+
+
 
 // --- Reusable Component 1: ProfileHeader ---
 const ProfileHeader = ({ user, onEditPress }: { user: UserProfileType | null; onEditPress: () => void }) => {
@@ -98,24 +100,35 @@ const settingsList = [
 export default function Profile() {
   const [userProfile, setUserProfile] = useState<UserProfileType | null>(null);
   const router = useRouter();
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const userProfileString = await AsyncStorage.getItem("userProfile");
-        if (userProfileString) {
-          const userProfile: UserProfileType = JSON.parse(userProfileString);
-          setUserProfile(userProfile);
+  useFocusEffect(
+    useCallback(() => {
+      const loadProfile = async () => {
+        try {
+          const userStr = await AsyncStorage.getItem("userProfile");
+          if (userStr) {
+            setUserProfile(JSON.parse(userStr));
+          }
+        } catch (err) {
+          console.error("Error loading updated profile:", err);
         }
-      } catch (error) {
-        console.error("Failed to load user profile:", error);
-      }
-    };
+      };
 
-    fetchUserProfile();
-  }, []);
+      loadProfile();
+    }, [])
+  );
 
   const onEditProfile = () => {
-    handlePress('Edit Profile');
+    router.push({
+    pathname: "/(main)/(tabs)/edit-profile",
+    params: {
+      name: userProfile?.name,
+      dob: userProfile?.dob,
+      gender: userProfile?.gender,
+      email: userProfile?.email,
+      profileUrl: userProfile?.profileUrl ?? "",
+      userId: String(userProfile?.userId),
+      },
+    });
   };
 
   const onSignOut = async () => {
