@@ -39,5 +39,50 @@
     "btn_back": "Back",
     "btn_next": "Next",
     "btn_finish": "Finish"
+  },
+  "qr_tutorial":{
+    "landing_title":"scan QR Code",
+    "landing_description":"Tap this button to scan any QR code and make instant payments at shops and restaurants.",
+    "qr_scanning1_title":"QR Code",
+    "qr_scanning1_description":"This is what a QR code looks like.",
+    "qr_scanning2_title": "Upload a QR code",
+    "qr_scanning2_description":"You can upload a QR code from your mobile's photos by clicking this button.",
+    "qr_scanning3_title": "Scan a QR code",
+    "qr_scanning3_description":"You can scan the QR code by pointing your camera to the QR code image provided by the receiver. Make sure the QR code shows up on the screen of your phone.",
+    "qr_scanning4_title": "Scan a QR code",
+    "qr_scanning4_description":"For now if you do not have a QR code to scan, click on next to go to the next step.",
+    "enter_amount1_title": "Check Recipient",
+    "enter_amount1_description":"This is the Account name of the person you are sending money to. Make sure the name of the person you actually are intending to send shows up.",
+    "enter_amount2_title": "Enter Amount",
+    "enter_amount2_description":
+      "Enter the amount you want to send to the recipient. Make sure to enter the correct amount.",
+    "enter_amount2_actionText": "Enter amount 120 to continue",
+    "enter_amount3_title": "Proceed to Pay",
+    "enter_amount3_description":
+      "Once you've entered the amount, click this button to proceed to the payment confirmation screen.",
+    "enter_amount3_actionText": "Click on Proceed to Pay button to continue",
+    "enter_amount4_title": "Verify Payment Details",
+    "enter_amount4_description":
+      "Review the payment details including the total amount and the bank account that will be used for the payment.",
+    "enter_amount5_title": "Complete Payment",
+    "enter_amount5_description":
+      "Click the Pay button to complete your payment. You'll be asked to enter your PIN for security.",
+    "enter_amount5_actionText":"Click on Pay button to continue",
+    "enter_pin1_title":"Verify Transaction Details",
+    "enter_pin1_description":"Double-check the recipient name and amount before proceeding. Make sure everything is correct.",
+    "enter_pin2_title": "UPI PIN Entry",
+    "enter_pin2_description":
+      "Your UPI PIN is a secure password for authorizing payments. Never share your UPI PIN with anyone even your friends or officials. Bank officials will never ask for your PIN either.",
+    "enter_pin3_title": "PIN Security",
+    "enter_pin3_description":
+      "Enter your carefully as you have limited attempts. As you enter, the dashes will change to dots representing an entered digit.",
+    "enter_pin4_title": "Payment Authorization",
+    "enter_pin4_description":
+      "This is an encrypted keyboard that you have to use to enter your secret PIN.",
+    "enter_pin4_actiontext": "Enter PIN 0000 to proceed",
+    "enter_pin5_title": "Payment Authorization",
+    "enter_pin5_description":
+      "Once you have entered the PIN click on check mark to send money.",
+    "enter_pin5_actiontext": "Click on the check mark to continue"
   }
 }

@@ -4,6 +4,7 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   Flashlight,
@@ -26,34 +27,35 @@ const { width, height } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "QR Code",
-    description: "This is what a QR code looks like.",
+    title: "qr_tutorial.qr_scanning1_title",
+    description: "qr_tutorial.qr_scanning1_description",
     top: "20%",
   },
   {
     id: 2,
-    title: "Upload a QR code",
+    title: "qr_tutorial.qr_scanning2_title",
     description:
-      "You can upload a QR code from your mobile's photos by clicking this button.",
+      "qr_tutorial.qr_scanning2_description",
     top: "30%",
   },
   {
     id: 3,
-    title: "Scan a QR code",
+    title: "qr_tutorial.qr_scanning3_title",
     description:
-      "You can scan the QR code by pointing your camera to the QR code image provided by the receiver. Make sure the QR code shows up on the screen of your phone.",
+      "qr_tutorial.qr_scanning3_description",
     top: "65%",
   },
   {
     id: 4,
-    title: "Scan a QR code",
+    title: "qr_tutorial.qr_scanning4_title",
     description:
-      "For now if you do not have a QR code to scan, click on next to go to the next step.",
+      "qr_tutorial.qr_scanning4_description",
     top: "60%",
   },
 ];
 
 export default function QRScanner() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [torch, setTorch] = useState(false);
@@ -240,10 +242,10 @@ export default function QRScanner() {
         }}
       >
         <Text style={styles.tooltipTitle}>
-          {WALKTHROUGH_STEPS[currentStep].title}
+          {t(WALKTHROUGH_STEPS[currentStep].title)}
         </Text>
         <Text style={styles.tooltipDescription}>
-          {WALKTHROUGH_STEPS[currentStep].description}
+          {t(WALKTHROUGH_STEPS[currentStep].description)}
         </Text>
 
         <View style={styles.tooltipButtons}>
