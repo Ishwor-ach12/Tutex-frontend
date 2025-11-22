@@ -5,6 +5,7 @@ import {
   Text, TextInput, TouchableOpacity, View, Dimensions
 } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
@@ -15,69 +16,70 @@ const TUTORIAL_IFSC = "DLXB0000258";
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Selected Bank",
-    description: "This shows the bank you selected. You can tap the edit icon to change the bank if needed.",
+    title: "bank_tutorial.account_details1_title",
+    description: "bank_tutorial.account_details1_description",
     highlightSection: "bankCard",
     tooltipPosition: 280,
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Enter Account Number",
-    description: `Enter the recipient's bank account number. For this tutorial, enter: ${TUTORIAL_ACCOUNT_NUMBER}`,
+    title: "bank_tutorial.account_details2_title",
+    description: "bank_tutorial.account_details2_description",
     highlightSection: "accountNumber",
     tooltipPosition: 340,
     requiresAction: true,
-    actionText: `Enter ${TUTORIAL_ACCOUNT_NUMBER} and click Next`,
+    actionText: "bank_tutorial.account_details2_actionText",
     validationFn: (data) => data.accountNumber === TUTORIAL_ACCOUNT_NUMBER,
   },
   {
     id: 3,
-    title: "Enter IFSC Code",
-    description: `Enter the 11-character IFSC code of the recipient's bank branch. For this tutorial, enter: ${TUTORIAL_IFSC}`,
+    title: "bank_tutorial.account_details3_title",
+    description: "bank_tutorial.account_details3_description",
     highlightSection: "ifsc",
     tooltipPosition: 420,
     requiresAction: true,
-    actionText: `Enter ${TUTORIAL_IFSC} and click Next`,
+    actionText: "bank_tutorial.account_details3_actionText",
     validationFn: (data) => data.ifsc === TUTORIAL_IFSC,
   },
   {
     id: 4,
-    title: "Verify Account Details",
-    description: "Now click the NEXT button to verify the account holder's name. This ensures you're sending money to the right person.",
+    title: "bank_tutorial.account_details4_title",
+    description: "bank_tutorial.account_details4_description",
     highlightSection: "nextButton",
     tooltipPosition: 300,
     requiresAction: true,
-    actionText: "Click NEXT to verify account details",
+    actionText: "bank_tutorial.account_details4_actionText",
   },
   {
     id: 5,
-    title: "Verified Account Holder",
-    description: "The account holder's name has been verified. Always confirm this matches the person you intend to send money to.",
+    title: "bank_tutorial.account_details5_title",
+    description: "bank_tutorial.account_details5_description",
     highlightSection: "verifiedName",
     tooltipPosition: 340,
     requiresAction: false,
   },
   {
     id: 6,
-    title: "Add Nickname (Optional)",
-    description: "You can add a nickname for this account to easily identify it later. This is optional but helpful for frequent transfers.",
+    title: "bank_tutorial.account_details6_title",
+    description: "bank_tutorial.account_details6_description",
     highlightSection: "nickname",
     tooltipPosition: 420,
     requiresAction: false,
   },
   {
     id: 7,
-    title: "Proceed to Payment",
-    description: "All set! Click 'PROCEED TO PAY' to continue to the payment screen where you'll enter the amount to transfer.",
+    title: "bank_tutorial.account_details7_title",
+    description: "bank_tutorial.account_details7_description",
     highlightSection: "proceedButton",
     tooltipPosition: 300,
     requiresAction: true,
-    actionText: "Click PROCEED TO PAY to continue",
+    actionText: "bank_tutorial.account_details7_actionText",
   },
 ];
 
 export default function AddBankAccount() {
+  const {t} = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
@@ -309,8 +311,8 @@ export default function AddBankAccount() {
 
     return (
       <View style={[styles.tooltipContainer, { top: currentWalkthrough.tooltipPosition }]}>
-        <Text style={styles.tooltipTitle}>{currentWalkthrough.title}</Text>
-        <Text style={styles.tooltipDescription}>{currentWalkthrough.description}</Text>
+        <Text style={styles.tooltipTitle}>{t(currentWalkthrough.title)}</Text>
+        <Text style={styles.tooltipDescription}>{t(currentWalkthrough.description)}</Text>
 
         <View style={styles.stepIndicator}>
           {WALKTHROUGH_STEPS.map((_, index) => (
@@ -333,7 +335,7 @@ export default function AddBankAccount() {
           </View>
         ) : (
           <View style={styles.tooltipActionContainer}>
-            <Text style={styles.actionText}>{currentWalkthrough.actionText}</Text>
+            <Text style={styles.actionText}>{t(currentWalkthrough.actionText || " ")}</Text>
             {currentStep > 0 && (
               <TouchableOpacity style={styles.prevButtonSmall} onPress={handlePrev}>
                 <Text style={styles.prevButtonSmallText}>← Previous Step</Text>

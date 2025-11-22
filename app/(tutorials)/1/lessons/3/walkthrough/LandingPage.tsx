@@ -28,6 +28,7 @@ import {
   Smartphone,
   Wallet,
 } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
 
@@ -37,9 +38,9 @@ const { width, height } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Send Money to Bank",
+    title: "bank_tutorial.landing_title",
     description:
-      "Transfer money directly to any bank account or between your own accounts instantly using Account Number & IFSC.",
+      "bank_tutorial.landing_description",
     target: {
       top: 310,
       left: width * 0.25 + 10,
@@ -55,6 +56,7 @@ const WALKTHROUGH_STEPS = [
 ];
 
 export default function PhonePeLanding() {
+  const{t} = useTranslation();
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -167,8 +169,8 @@ export default function PhonePeLanding() {
               },
             ]}
           >
-            <Text style={styles.tooltipTitle}>{step.title}</Text>
-            <Text style={styles.tooltipDescription}>{step.description}</Text>
+            <Text style={styles.tooltipTitle}>{t(step.title)}</Text>
+            <Text style={styles.tooltipDescription}>{t(step.description)}</Text>
 
             {/* Plain Left-aligned Text */}
             <Text style={styles.proceedNoteText}>

@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -32,16 +33,17 @@ const { width, height } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Select Mobile Payment",
+    title: "mobile_tutorial.landing_title",
     description:
-      "Tap the “To Mobile Number” option under the Money Transfers section to begin sending money using the recipient’s mobile number.",
+      "mobile_tutorial.landing_description",
     top: "60%",
     requiresAction: true,
-    actionText: "Tap on 'To Mobile Number' to continue",
+    actionText: "mobile_tutorial.landing_actiontext",
   },
 ];
 
 export default function PhonePeLanding() {
+  const {t} = useTranslation();
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showHeader, setShowHeader] = useState(false);
@@ -130,10 +132,10 @@ export default function PhonePeLanding() {
           }}
         >
           <Text style={styles.tooltipTitle}>
-            {WALKTHROUGH_STEPS[currentStep].title}
+            {t(WALKTHROUGH_STEPS[currentStep].title)}
           </Text>
           <Text style={styles.tooltipDescription}>
-            {WALKTHROUGH_STEPS[currentStep].description}
+            {t(WALKTHROUGH_STEPS[currentStep].description)}
           </Text>
 
           <Text
@@ -145,7 +147,7 @@ export default function PhonePeLanding() {
               fontWeight: "bold",
             }}
           >
-            {WALKTHROUGH_STEPS[currentStep].actionText}
+            {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
           </Text>
         </View>
       )}

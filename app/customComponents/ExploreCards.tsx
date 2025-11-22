@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import {useTranslation} from "react-i18next";
 import {
   FlatList,
   Image,
@@ -86,6 +87,7 @@ const ExploreCard: React.FC<{ item: Course }> = ({ item }) => {
 };
 
 const ExploreCards = () => {
+  const {t} = useTranslation();
   const renderExploreCard = ({ item }: ListRenderItemInfo<Course>) => (
     <ExploreCard item={item} />
   );
@@ -141,7 +143,7 @@ const ExploreCards = () => {
   return (
     <>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Explore</Text>
+        <Text style={styles.sectionTitle}>{t("static_text.home_explore")}</Text>
       </View>
 
       <FlatList

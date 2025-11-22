@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import {useTranslation} from "react-i18next";
 import {
   FlatList,
   Image,
@@ -87,6 +88,7 @@ const RecommendedLessons = () => {
   const [courses, setCourses] = useState<Tutorial[]>(yourLessonsData);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const {t} = useTranslation();
 
   useEffect(() => {
     fetchCourses();
@@ -155,9 +157,9 @@ const RecommendedLessons = () => {
   return (
     <>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recommended Lessons</Text>
+        <Text style={styles.sectionTitle}>{t("static_text.home_recom")}</Text>
         <TouchableOpacity onPress={handleSeeAll}>
-          <Text style={styles.seeAllText}>See all</Text>
+          <Text style={styles.seeAllText}>{t("static_text.home_See")}</Text>
         </TouchableOpacity>
       </View>
       <FlatList

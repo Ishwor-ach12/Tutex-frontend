@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {useTranslation} from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
@@ -51,34 +52,35 @@ const bankData = {
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Select the Receiver's Bank",
-    description: "Choose the bank where the receiver holds their account. You can select from popular banks below or use the search bar to find any bank quickly.",
+    title: "bank_tutorial.select_bank1_title",
+    description: "bank_tutorial.select_bank1_description",
     highlightSection: "page",
     tooltipPosition: "top",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Search for a Bank",
-    description: "Tap the search bar and type the bank name. Try typing 'Dhanlaxmi Bank' as an example.",
+    title: "bank_tutorial.select_bank2_title",
+    description: "bank_tutorial.select_bank2_description",
     highlightSection: "search",
     tooltipPosition: "middle",
     requiresAction: true,
-    actionText: "Type 'Dhanlaxmi' to continue",
+    actionText: "bank_tutorial.select_bank2_actionText",
     validationFn: (search) => search.toLowerCase().includes("dhanlaxmi"),
   },
   {
     id: 3,
-    title: "Select Your Bank",
-    description: "Great! Now tap on 'Dhanlaxmi Bank' from the search results to proceed with adding account details.",
+    title: "bank_tutorial.select_bank3_title",
+    description: "bank_tutorial.select_bank3_description",
     highlightSection: "dhanlaxmi",
     tooltipPosition: "bottom",
     requiresAction: true,
-    actionText: "Tap on Dhanlaxmi Bank to continue",
+    actionText: "bank_tutorial.select_bank3_actionText",
   },
 ];
 
 export default function BankSelector() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -182,8 +184,8 @@ export default function BankSelector() {
 
     return (
       <View style={[styles.tooltipContainer, positionStyle]}>
-        <Text style={styles.tooltipTitle}>{currentWalkthrough.title}</Text>
-        <Text style={styles.tooltipDescription}>{currentWalkthrough.description}</Text>
+        <Text style={styles.tooltipTitle}>{t(currentWalkthrough.title)}</Text>
+        <Text style={styles.tooltipDescription}>{t(currentWalkthrough.description)}</Text>
 
         <View style={styles.stepIndicator}>
           {WALKTHROUGH_STEPS.map((_, index) => (
@@ -205,7 +207,7 @@ export default function BankSelector() {
             </TouchableOpacity>
           </View>
         ) : (
-          <Text style={styles.actionText}>{currentWalkthrough.actionText}</Text>
+          <Text style={styles.actionText}>{t(currentWalkthrough.actionText || " ")}</Text>
         )}
       </View>
     );
