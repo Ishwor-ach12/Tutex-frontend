@@ -13,21 +13,23 @@ import {
 } from "react-native";
 import { ArrowLeft, HelpCircle, Plus } from "lucide-react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useTranslation} from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Add a New Bank Account",
-    description: "Click here to add a beneficiary's bank account details. You'll need their Account Number and IFSC code to proceed. Once saved, you can quickly transfer money to this account anytime without re-entering details.",
+    title: "bank_tutorial.add_beneficiary1_title",
+    description: "bank_tutorial.add_beneficiary1_description",
     highlightSection: "addBankButton",
     requiresAction: true,
-    actionText: "Click on icon to add account",
+    actionText: "bank_tutorial.add_beneficiary1_actionText",
   },
 ];
 
 export default function AccountNumberIFSC() {
+  const {t} = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [currentStep, setCurrentStep] = useState(0);
@@ -78,8 +80,8 @@ export default function AccountNumberIFSC() {
 
     return (
       <View style={styles.tooltipContainer}>
-        <Text style={styles.tooltipTitle}>{currentWalkthrough.title}</Text>
-        <Text style={styles.tooltipDescription}>{currentWalkthrough.description}</Text>
+        <Text style={styles.tooltipTitle}>{t(currentWalkthrough.title)}</Text>
+        <Text style={styles.tooltipDescription}>{t(currentWalkthrough.description)}</Text>
 
         {/* Step Indicator - only show if multiple steps */}
         {WALKTHROUGH_STEPS.length > 1 && (
@@ -111,7 +113,7 @@ export default function AccountNumberIFSC() {
         ) : (
           <View style={styles.tooltipButtons}>
             <TouchableOpacity style={styles.tryNowButton}>
-              <Text style={styles.tryNowButtonText}>{currentWalkthrough.actionText}</Text>
+              <Text style={styles.tryNowButtonText}>{t(currentWalkthrough.actionText || " ")}</Text>
             </TouchableOpacity>
           </View>
         )}

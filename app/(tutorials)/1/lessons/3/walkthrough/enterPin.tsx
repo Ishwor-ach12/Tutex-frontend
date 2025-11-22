@@ -5,6 +5,7 @@ import {
   Alert, Dimensions, Image, Modal, SafeAreaView, StatusBar, StyleSheet,
   Text, TouchableOpacity, View, Platform, Animated,
 } from "react-native";
+import {useTranslation} from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CORRECT_PIN = "0000";
@@ -14,46 +15,46 @@ const { width, height } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Verify Transaction Details",
-    description: "Double-check the recipient name and amount before proceeding. Make sure everything is correct.",
+    title: "bank_tutorial.enter_pin1_title",
+    description: "bank_tutorial.enter_pin1_description",
     highlightSection: "transactionDetails",
     tooltipPosition: "25%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "UPI PIN Entry",
-    description: "Your UPI PIN is a secure password for authorizing payments. Never share your UPI PIN with anyone, even friends or officials. Bank officials will never ask for your PIN.",
+    title: "bank_tutorial.enter_pin2_title",
+    description: "bank_tutorial.enter_pin2_description",
     highlightSection: "pinSection",
     tooltipPosition: "30%",
     requiresAction: false,
   },
   {
     id: 3,
-    title: "PIN Security",
-    description: "Enter your PIN carefully as you have limited attempts. As you enter, the dashes will change to dots representing an entered digit.",
+    title: "bank_tutorial.enter_pin3_title",
+    description: "bank_tutorial.enter_pin3_description",
     highlightSection: "pinDots",
     tooltipPosition: "50%",
     requiresAction: false,
   },
   {
     id: 4,
-    title: "Payment Authorization",
-    description: "This is an encrypted keyboard that you have to use to enter your secret PIN.",
+    title: "bank_tutorial.enter_pin4_title",
+    description: "bank_tutorial.enter_pin4_description",
     highlightSection: "keypad",
     tooltipPosition: "37%",
     requiresAction: true,
-    actionText: "Enter PIN 0000 to proceed",
+    actionText: "bank_tutorial.enter_pin4_actiontext",
     validationFn: (pin) => pin === CORRECT_PIN,
   },
   {
     id: 5,
-    title: "Complete Payment",
-    description: "Once you have entered the PIN, click on the check mark to send money.",
+    title: "bank_tutorial.enter_pin5_title",
+    description: "bank_tutorial.enter_pin5_description",
     highlightSection: "checkButton",
     tooltipPosition: "37%",
     requiresAction: true,
-    actionText: "Click on the check mark to continue",
+    actionText: "bank_tutorial.enter_pin5_actiontext",
   },
 ];
 
@@ -112,6 +113,7 @@ const Keypad = ({ onKeyPress, currentStep }) => {
 };
 
 export default function PaymentPinScreen() {
+  const {t} = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
@@ -219,8 +221,8 @@ export default function PaymentPinScreen() {
     if (!showTutorial) return null;
     return (
       <View style={[styles.tooltipContainer, { top: currentWalkthrough.tooltipPosition }]}>
-        <Text style={styles.tooltipTitle}>{currentWalkthrough.title}</Text>
-        <Text style={styles.tooltipDescription}>{currentWalkthrough.description}</Text>
+        <Text style={styles.tooltipTitle}>{t(currentWalkthrough.title)}</Text>
+        <Text style={styles.tooltipDescription}>{t(currentWalkthrough.description)}</Text>
         <View style={styles.stepIndicator}>
           {WALKTHROUGH_STEPS.map((_, index) => (
             <View key={index} style={[styles.stepDot, index === currentStep && styles.stepDotActive]} />
@@ -237,7 +239,7 @@ export default function PaymentPinScreen() {
           </View>
         ) : (
           <View style={styles.tooltipActionContainer}>
-            <Text style={styles.actionText}>{currentWalkthrough.actionText}</Text>
+            <Text style={styles.actionText}>{t(currentWalkthrough.actionText || " ")}</Text>
             {currentStep > 0 && (
               <TouchableOpacity style={styles.prevButtonSmall} onPress={handlePrev}>
                 <Text style={styles.prevButtonSmallText}>← Previous Step</Text>

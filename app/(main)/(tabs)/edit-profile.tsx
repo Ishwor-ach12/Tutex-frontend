@@ -203,7 +203,7 @@ const EditProfileScreen: React.FC = () => {
       )}
 
       {/* Gender Dropdown */}
-      <Menu
+      {/* <Menu
         visible={menuVisible}
         onDismiss={() => setMenuVisible(false)}
         anchor={
@@ -239,7 +239,49 @@ const EditProfileScreen: React.FC = () => {
           }}
           title="Other"
         />
-      </Menu>
+      </Menu> */}
+
+      {/* Gender Dropdown */}
+      <View>
+        <Menu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          anchor={
+            <View>
+              <TextInput
+                label="Gender"
+                mode="outlined"
+                value={gender}
+                editable={false}
+                style={styles.input}
+                onPressIn={() => setMenuVisible(true)} // FIXED
+              />
+            </View>
+          }
+        >
+          <Menu.Item
+            onPress={() => {
+              setGender("M");
+              setMenuVisible(false);
+            }}
+            title="Male"
+          />
+          <Menu.Item
+            onPress={() => {
+              setGender("F");
+              setMenuVisible(false);
+            }}
+            title="Female"
+          />
+          <Menu.Item
+            onPress={() => {
+              setGender("O");
+              setMenuVisible(false);
+            }}
+            title="Other"
+          />
+        </Menu>
+      </View>
 
       {/* Buttons */}
       <View style={styles.buttonsRow}>
@@ -260,7 +302,10 @@ const EditProfileScreen: React.FC = () => {
       </View>
 
       {/* Delete Account */}
-      <TouchableOpacity style={styles.deleteOption} onPress={handleDeleteAccount}>
+      <TouchableOpacity
+        style={styles.deleteOption}
+        onPress={handleDeleteAccount}
+      >
         <Text style={styles.deleteText}>Delete Account</Text>
       </TouchableOpacity>
     </View>

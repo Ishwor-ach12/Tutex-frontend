@@ -12,6 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { ArrowLeft, HelpCircle, ChevronRight } from "lucide-react-native";
+import {useTranslation} from "react-i18next";
 
 const STATUS_BAR_HEIGHT = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 28;
 const { width } = Dimensions.get("window");
@@ -19,24 +20,25 @@ const { width } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Transfer to Your Own Bank Account",
-    description: "Quickly move funds between your own linked bank accounts. This option is perfect for managing money across your different banks instantly and securely.",
+    title: "bank_tutorial.choose_service1_title",
+    description: "bank_tutorial.choose_service1_description",
     highlightSection: "selfBank",
     top: "52%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Send Money to Any Bank Account",
-    description: "Transfer money to anyone in India using their Account Number & IFSC code. Now let's try sending money to a bank account by clicking this option.",
+    title: "bank_tutorial.choose_service2_title",
+    description: "bank_tutorial.choose_service2_description",
     highlightSection: "accountIFSC",
     top: "52%",
     requiresAction: true,
-    actionText: "Click on 'To Account Number & IFSC' to continue",
+    actionText: "bank_tutorial.choose_service2_actionText",
   },
 ];
 
 export default function SendMoney() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [showTutorial, setShowTutorial] = useState(true);
@@ -131,8 +133,8 @@ export default function SendMoney() {
 
     return (
       <View style={[styles.tooltipContainer, { top: currentWalkthrough.top }]}>
-        <Text style={styles.tooltipTitle}>{currentWalkthrough.title}</Text>
-        <Text style={styles.tooltipDescription}>{currentWalkthrough.description}</Text>
+        <Text style={styles.tooltipTitle}>{t(currentWalkthrough.title)}</Text>
+        <Text style={styles.tooltipDescription}>{t(currentWalkthrough.description)}</Text>
 
         {/* Step Indicator */}
         <View style={styles.stepIndicator}>
@@ -160,7 +162,7 @@ export default function SendMoney() {
             </TouchableOpacity>
           </View>
         ) : (
-          <Text style={styles.actionText}>{currentWalkthrough.actionText}</Text>
+          <Text style={styles.actionText}>{t(currentWalkthrough.actionText || " ")}</Text>
         )}
       </View>
     );

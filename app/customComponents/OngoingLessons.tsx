@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import {useTranslation} from "react-i18next";
 import {
   FlatList,
   Image,
@@ -52,6 +53,7 @@ type transformedCourse = {
   slug: string;
 };
 const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
+  const {t} = useTranslation();
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -85,7 +87,7 @@ const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
             } as any)
           }
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{t("static_text.home_continue")}</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -93,6 +95,7 @@ const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
 };
 
 const OngoingLessons = () => {
+  const {t} = useTranslation();
   const [courses, setCourses] = useState<transformedCourse[]>(sampleData);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -167,9 +170,9 @@ const OngoingLessons = () => {
   return (
     <>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Ongoing Lessons</Text>
+        <Text style={styles.sectionTitle}>{t("static_text.home_onlesson")}</Text>
         <TouchableOpacity onPress={handleSeeAll}>
-          <Text style={styles.seeAllText}>See all</Text>
+          <Text style={styles.seeAllText}>{t("static_text.home_See")}</Text>
         </TouchableOpacity>
       </View>
       <FlatList

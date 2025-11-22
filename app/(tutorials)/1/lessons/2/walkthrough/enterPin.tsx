@@ -8,6 +8,7 @@ import {
   Minus,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
+import {useTranslation} from 'react-i18next';
 // FIX: Using core React Native components
 import {
   Alert,
@@ -57,45 +58,45 @@ const { width, height } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Verify Transaction Details",
+    title: "mobile_tutorial.enter_pin1_title",
     description:
-      "Double-check the recipient name and amount before proceeding. Make sure everything is correct.",
+      "mobile_tutorial.enter_pin1_description",
     top: "25%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "UPI PIN Entry",
+    title: "mobile_tutorial.enter_pin2_title",
     description:
-      "Your UPI PIN is a secure password for authorizing payments. Never share your UPI PIN with anyone even your friends or officials. Bank officials will never ask for your PIN either.",
+      "mobile_tutorial.enter_pin2_description",
     top: "30%",
     requiresAction: false,
   },
   {
     id: 3,
-    title: "PIN Security",
+    title: "mobile_tutorial.enter_pin3_title",
     description:
-      "Enter your carefully as you have limited attempts. As you enter, the dashes will change to dots representing an entered digit.",
+      "mobile_tutorial.enter_pin3_description",
     top: "50%",
     requiresAction: false,
   },
   {
     id: 4,
-    title: "Payment Authorization",
+    title: "mobile_tutorial.enter_pin4_title",
     description:
-      "This is an encrypted keyboard that you have to use to enter your secret PIN.",
+      "mobile_tutorial.enter_pin4_description",
     top: "37%",
     requiresAction: true,
-    actionText: "Enter PIN 0000 to proceed",
+    actionText: "mobile_tutorial.enter_pin4_actiontext",
   },
   {
     id: 5,
-    title: "Payment Authorization",
+    title: "mobile_tutorial.enter_pin5_title",
     description:
-      "Once you have entered the PIN click on check mark to send money.",
+      "mobile_tutorial.enter_pin5_description",
     top: "37%",
     requiresAction: true,
-    actionText: "Click on the check mark to continue",
+    actionText: "mobile_tutorial.enter_pin5_actiontext",
   },
 ];
 
@@ -224,6 +225,7 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
 
 // --- Main Screen Component ---
 export default function PaymentPinScreen() {
+  const {t} = useTranslation();
   const router = useRouter();
   const { data } = useLocalSearchParams();
   const parsed = data ? JSON.parse(data as string) : {};
@@ -421,10 +423,10 @@ export default function PaymentPinScreen() {
         }}
       >
         <Text style={styles.tooltipTitle}>
-          {WALKTHROUGH_STEPS[currentStep].title}
+          {t(WALKTHROUGH_STEPS[currentStep].title)}
         </Text>
         <Text style={styles.tooltipDescription}>
-          {WALKTHROUGH_STEPS[currentStep].description}
+          {t(WALKTHROUGH_STEPS[currentStep].description)}
         </Text>
 
         {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
@@ -452,7 +454,7 @@ export default function PaymentPinScreen() {
               fontWeight: "bold",
             }}
           >
-            {WALKTHROUGH_STEPS[currentStep].actionText}
+            {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
           </Text>
         )}
       </View>

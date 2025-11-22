@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect, useRouter } from "expo-router";
+import { t } from "i18next";
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   ScrollView,
@@ -75,7 +77,9 @@ const ProfileHeader = ({
 
         {/* Edit Button */}
         <TouchableOpacity style={styles.editButton} onPress={onEditPress}>
-          <Text style={styles.editButtonText}>Edit</Text>
+          <Text style={styles.editButtonText}>
+          {`${t("static_text.profile_edit")}`}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -120,39 +124,44 @@ const SettingItem = ({
 // --- Main Component: Profile (App) ---
 const settingsList = [
   {
-    title: "My Learning Progress",
+    title: "static_text.profile_lp",
     icon: "bar-chart-outline",
     action: "progress",
   },
   {
-    title: "Accessibility Settings",
+    title: "static_text.profile_as",
     icon: "contrast-outline",
     action: "accessibility",
   },
   {
-    title: "Change Password & Security",
+    title: "static_text.profile_cp",
     icon: "lock-closed-outline",
     action: "change_password",
   },
   {
-    title: "Language Preferences",
+    title: "static_text.profile_lang",
     icon: "language-outline",
     action: "language",
   },
   {
-    title: "Notification Settings",
+    title: "static_text.profile_notset",
     icon: "notifications-outline",
     action: "notifications",
   },
-  { title: "Help & Feedback", icon: "help-circle-outline", action: "help" },
   {
-    title: "Terms of Use & Privacy",
+    title: "static_text.profile_help",
+    icon: "help-circle-outline",
+    action: "help",
+  },
+  {
+    title: "static_text.profile_tnc",
     icon: "document-text-outline",
     action: "legal",
   },
 ];
 
 export default function Profile() {
+  const { t } = useTranslation();
   const [userProfile, setUserProfile] = useState<UserProfileType | null>(null);
   const router = useRouter();
 
@@ -190,9 +199,10 @@ export default function Profile() {
   const onSettingPress = (title: string, action: string) => {
     switch (action) {
       case "language":
+        console.log("Pressed:", title);
         router.push("/(main)/(tabs)/language-preference");
         break;
-      case "security":
+      case "change_password":
         router.push("/(main)/(tabs)/changePassword");
         break;
       default:
@@ -215,14 +225,14 @@ export default function Profile() {
           {settingsList.map((item) => (
             <SettingItem
               key={item.title}
-              title={item.title}
+              title={t(item.title)}
               iconName={item.icon}
               onPress={() => onSettingPress(item.title, item.action)}
             />
           ))}
 
           <SettingItem
-            title="Signout"
+            title={t("static_text.profile_logout")}
             iconName="log-out-outline"
             isSignout={true}
             onPress={onSignOut}

@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import {useTranslation} from "react-i18next";
 import {
   FlatList,
   Image,
@@ -107,6 +108,7 @@ const LessonCard: React.FC<{ item: transformedCourse }> = ({ item }) => {
 };
 
 const OngoingLessons = () => {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState<transformedCourse[]>(sampleData);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -178,7 +180,7 @@ const OngoingLessons = () => {
   return (
     <ScrollView style={{ backgroundColor: "white" }}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Ongoing Lessons</Text>
+        <Text style={styles.sectionTitle}>{t("static_text.home_onlesson")}</Text>
       </View>
       <FlatList
         data={courses}

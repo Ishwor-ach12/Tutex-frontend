@@ -1,6 +1,7 @@
 // SendMoney.tsx - React Native with Expo
 
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   ChevronRight,
@@ -65,49 +66,50 @@ const payments = [
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Recent Contacts",
+    title: "mobile_tutorial.sendMoney1_title",
     description:
-      "Here you can see the list of people you’ve recently sent or received money from. It helps you quickly repeat a payment without searching again.",
+      "mobile_tutorial.sendMoney1_description",
     top: "12%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Search for a Contact",
+    title: "mobile_tutorial.sendMoney2_title",
     description:
-      "Use the search bar to find any contact by name. This is helpful when the list is long or when you want to send money to someone specific.",
+      "mobile_tutorial.sendMoney2_description",
     top: "45%",
     requiresAction: false,
   },
   {
     id: 3,
-    title: "Search by Mobile Number",
+    title: "mobile_tutorial.sendMoney3_title",
     description:
-      "If the person is not saved in your contacts, simply type their mobile number here. Their UPI ID will automatically appear if it’s linked.",
+      "mobile_tutorial.sendMoney3_description",
     top: "40%",
     requiresAction: false,
   },
   {
     id: 4,
-    title: "Find Vivek",
+    title: "mobile_tutorial.sendMoney4_title",
     description:
-      "Type ‘Vivek’ in the search bar to filter and locate his contact quickly.",
+      "mobile_tutorial.sendMoney4_description",
     top: "55%",
     requiresAction: true,
-    actionText: "Search for ‘Vivek’ to continue",
+    actionText: "mobile_tutorial.sendMoney4_actionText",
   },
   {
     id: 5,
-    title: "Open Contact Details",
+    title: "mobile_tutorial.sendMoney5_title",
     description:
-      "Tap on Vivek’s contact to view your payment history and begin a new transaction.",
+      "mobile_tutorial.sendMoney5_description",
     top: "60%",
     requiresAction: true,
-    actionText: "Tap on Vivek’s contact to continue",
+    actionText: "mobile_tutorial.sendMoney5_actionText",
   },
 ];
 
 export default function SendMoney() {
+  const {t} = useTranslation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPayments, setFilteredPayments] = useState(payments);
@@ -170,10 +172,10 @@ export default function SendMoney() {
           }}
         >
           <Text style={styles.tooltipTitle}>
-            {WALKTHROUGH_STEPS[currentStep].title}
+            {t(WALKTHROUGH_STEPS[currentStep].title)}
           </Text>
           <Text style={styles.tooltipDescription}>
-            {WALKTHROUGH_STEPS[currentStep].description}
+            {t(WALKTHROUGH_STEPS[currentStep].description)}
           </Text>
           {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
             <View style={styles.tooltipButtons}>
@@ -200,7 +202,7 @@ export default function SendMoney() {
                 fontWeight: "bold",
               }}
             >
-              {WALKTHROUGH_STEPS[currentStep].actionText}
+              {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
             </Text>
           )}
         </View>

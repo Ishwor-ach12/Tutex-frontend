@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   HelpCircle,
@@ -78,57 +79,58 @@ const { width, height } = Dimensions.get("window");
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Verify Recipient",
+    title: "mobile_tutorial.enter_amount1_title",
     description:
-      "Before sending money, always confirm that you're on the correct chat. Check the name and mobile number shown in the header to ensure you're paying the right person.",
+      "mobile_tutorial.enter_amount1_description",
     top: "20%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Payments You Sent",
+    title: "mobile_tutorial.enter_amount2_title",
     description:
-      "These purple cards represent the payments you have sent to this person. Each card shows the amount, status, and time of the payment.",
+      "mobile_tutorial.enter_amount2_description",
     top: "45%",
     requiresAction: false,
   },
   {
     id: 3,
-    title: "Payments You Received",
+    title: "mobile_tutorial.enter_amount3_title",
     description:
-      "Black cards represent money you have received from this person. This helps you track your overall transaction history clearly.",
+      "mobile_tutorial.enter_amount3_description",
     top: "28%",
     requiresAction: false,
   },
   {
     id: 4,
-    title: "Enter Amount",
+    title: "mobile_tutorial.enter_amount4_title",
     description:
-      "Use this text box at the bottom to type any amount or send a message. When you enter a valid amount, the Pay button will appear.",
+      "mobile_tutorial.enter_amount4_description",
     top: "28%",
     requiresAction: false,
   },
   {
     id: 5,
-    title: "Enter ₹120",
+    title: "mobile_tutorial.enter_amount5_title",
     description:
-      "Type the amount 120 in the input box to proceed with the walkthrough.",
+      "mobile_tutorial.enter_amount5_description",
     top: "28%",
     requiresAction: true,
-    actionText: "Enter amount 120 to continue",
+    actionText: "mobile_tutorial.enter_amount5_actionText",
   },
   {
     id: 6,
-    title: "Complete Payment",
+    title: "mobile_tutorial.enter_amount6_title",
     description:
-      "Tap the Pay button to continue to the final payment confirmation screen.",
+      "mobile_tutorial.enter_amount6_description",
     top: "28%",
     requiresAction: true,
-    actionText: "Press the Pay button to continue",
+    actionText: "mobile_tutorial.enter_amount6_actionText",
   },
 ];
 
 export default function EnterAmount() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -630,10 +632,10 @@ export default function EnterAmount() {
               }}
             >
               <Text style={styles.tooltipTitle}>
-                {WALKTHROUGH_STEPS[currentStep].title}
+                {t(WALKTHROUGH_STEPS[currentStep].title)}
               </Text>
               <Text style={styles.tooltipDescription}>
-                {WALKTHROUGH_STEPS[currentStep].description}
+                {t(WALKTHROUGH_STEPS[currentStep].description)}
               </Text>
               {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
                 <View style={styles.tooltipButtons}>
@@ -660,7 +662,7 @@ export default function EnterAmount() {
                     fontWeight: "bold",
                   }}
                 >
-                  {WALKTHROUGH_STEPS[currentStep].actionText}
+                  {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
                 </Text>
               )}
             </View>

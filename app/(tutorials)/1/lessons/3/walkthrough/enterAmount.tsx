@@ -3,6 +3,7 @@ import {
   ArrowLeft, HelpCircle, Image as ImageIcon, PlusCircle, RefreshCw,
 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation} from "react-i18next";
 import {
   Animated, Dimensions, Easing, Keyboard, Platform, SafeAreaView,
   StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View,
@@ -16,42 +17,43 @@ const TUTORIAL_AMOUNT = "100";
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Recipient Details",
-    description: "This header shows who you're sending money to. Verify the recipient's name and bank details before proceeding.",
+    title: "bank_tutorial.enter_amount1_title",
+    description: "bank_tutorial.enter_amount1_description",
     highlightSection: "header",
     tooltipPosition: "below",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Enter Amount",
-    description: `Enter the amount you want to transfer. For this tutorial, enter: ₹${TUTORIAL_AMOUNT}`,
+    title: "bank_tutorial.enter_amount2_title",
+    description: "bank_tutorial.enter_amount2_description",
     highlightSection: "amountInput",
     tooltipPosition: "above",
     requiresAction: true,
-    actionText: `Enter ${TUTORIAL_AMOUNT} and click Continue`,
+    actionText: "bank_tutorial.enter_amount2_actionText",
     validationFn: (data) => data.amount === TUTORIAL_AMOUNT,
   },
   {
     id: 3,
-    title: "Select Payment Method",
-    description: "This shows which account will be used for the payment. You can tap to change the payment source if you have multiple accounts linked.",
+    title: "bank_tutorial.enter_amount3_title",
+    description: "bank_tutorial.enter_amount3_description",
     highlightSection: "paymentMethod",
     tooltipPosition: "above",
     requiresAction: false,
   },
   {
     id: 4,
-    title: "Complete Payment",
-    description: "Tap the PAY button to proceed. You'll be asked to enter your UPI PIN on the next screen to authorize the transaction.",
+    title: "bank_tutorial.enter_amount4_title",
+    description: "bank_tutorial.enter_amount4_description",
     highlightSection: "payButton",
     tooltipPosition: "above",
     requiresAction: true,
-    actionText: "Tap PAY to continue",
+    actionText: "bank_tutorial.enter_amount4_actionText",
   },
 ];
 
 export default function EnterAmount() {
+  const {t} = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
@@ -184,8 +186,8 @@ export default function EnterAmount() {
 
     return (
       <View style={[styles.tooltipContainer, getTooltipStyle()]}>
-        <Text style={styles.tooltipTitle}>{currentWalkthrough.title}</Text>
-        <Text style={styles.tooltipDescription}>{currentWalkthrough.description}</Text>
+        <Text style={styles.tooltipTitle}>{t(currentWalkthrough.title)}</Text>
+        <Text style={styles.tooltipDescription}>{t(currentWalkthrough.description)}</Text>
 
         <View style={styles.stepIndicator}>
           {WALKTHROUGH_STEPS.map((_, index) => (
@@ -208,7 +210,7 @@ export default function EnterAmount() {
           </View>
         ) : (
           <View style={styles.tooltipActionContainer}>
-            <Text style={styles.actionText}>{currentWalkthrough.actionText}</Text>
+            <Text style={styles.actionText}>{t(currentWalkthrough.actionText || " ")}</Text>
             {currentStep > 0 && (
               <TouchableOpacity style={styles.prevButtonSmall} onPress={handlePrev}>
                 <Text style={styles.prevButtonSmallText}>← Previous Step</Text>
