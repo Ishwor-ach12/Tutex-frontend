@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -25,53 +26,56 @@ import {
 
 const { width, height } = Dimensions.get("window");
 
+
+
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "Check Recipient",
+    title: "qr_tutorial.enter_amount1_title",
     description:
-      "This is the Account name of the person you are sending money to. Make sure the name of the person you actually are intending to send shows up.",
+      "qr_tutorial.enter_amount1_description",
     top: "30%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "Enter Amount",
+    title: "qr_tutorial.enter_amount2_title",
     description:
-      "Enter the amount you want to send to the recipient. Make sure to enter the correct amount.",
+      "qr_tutorial.enter_amount2_description",
     top: "38%",
     requiresAction: true,
-    actionText: "Enter amount 120 to continue"
+    actionText: "qr_tutorial.enter_amount2_actionText"
   },
   {
     id: 3,
-    title: "Proceed to Pay",
+    title: "qr_tutorial.enter_amount3_title",
     description:
-      "Once you've entered the amount, click this button to proceed to the payment confirmation screen.",
+      "qr_tutorial.enter_amount3_description",
     top: "60%",
     requiresAction: true,
-    actionText: "Click on Proceed to Pay button to continue"
+    actionText: "qr_tutorial.enter_amount3_actionText"
   },
   {
     id: 4,
-    title: "Verify Payment Details",
+    title: "qr_tutorial.enter_amount4_title",
     description:
-      "Review the payment details including the total amount and the bank account that will be used for the payment.",
+      "qr_tutorial.enter_amount4_description",
     top: "15%",
     requiresAction: false,
   },
   {
     id: 5,
-    title: "Complete Payment",
+    title: "qr_tutorial.enter_amount5_title",
     description:
-      "Click the Pay button to complete your payment. You'll be asked to enter your PIN for security.",
+      "qr_tutorial.enter_amount5_description",
     top: "15%",
     requiresAction: true,
-    actionText:"Click on Pay button to continue"
+    actionText:"qr_tutorial.enter_amount5_actionText"
   },
 ];
 
 export default function EnterAmount() {
+  const {t} = useTranslation();
   const router = useRouter();
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
@@ -147,11 +151,13 @@ export default function EnterAmount() {
             borderRadius: 10,
           }}
         >
+          
           <Text style={styles.tooltipTitle}>
-            {WALKTHROUGH_STEPS[currentStep].title}
+
+            {t(WALKTHROUGH_STEPS[currentStep].title)}
           </Text>
           <Text style={styles.tooltipDescription}>
-            {WALKTHROUGH_STEPS[currentStep].description}
+            {t(WALKTHROUGH_STEPS[currentStep].description)}
           </Text>
           {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
             <View style={styles.tooltipButtons}>
@@ -178,7 +184,7 @@ export default function EnterAmount() {
                 fontWeight: "bold",
               }}
             >
-              {WALKTHROUGH_STEPS[currentStep].actionText}
+              {t(WALKTHROUGH_STEPS[currentStep].actionText)}
             </Text>
           )}
         </View>
@@ -388,10 +394,10 @@ export default function EnterAmount() {
               }}
             >
               <Text style={styles.tooltipTitle}>
-                {WALKTHROUGH_STEPS[currentStep].title}
+                {t(WALKTHROUGH_STEPS[currentStep].title)}
               </Text>
               <Text style={styles.tooltipDescription}>
-                {WALKTHROUGH_STEPS[currentStep].description}
+                {t(WALKTHROUGH_STEPS[currentStep].description)}
               </Text>
               {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
                 <View style={styles.tooltipButtons}>
@@ -418,7 +424,7 @@ export default function EnterAmount() {
                     fontWeight: "bold",
                   }}
                 >
-              {WALKTHROUGH_STEPS[currentStep].actionText}
+              {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
                 </Text>
               )}
             </View>
