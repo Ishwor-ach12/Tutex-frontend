@@ -81,8 +81,9 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.trends}>
         <Image
-          source={require("../../../assets/logo.png")}
+          source={require("../../../assets/quote.png")}
           style={styles.trendsImage}
+          resizeMode = "cover"
         />
       </View>
       {/* --- Your Lessons Section --- */}
@@ -115,8 +116,8 @@ const styles = StyleSheet.create({
   },
   trendsImage: {
     height: 200,
-    objectFit: "contain",
-    width: 0,
+    objectFit: "cover",
+    width: "100%",
   },
   // Headers
   sectionHeader: {
