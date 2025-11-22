@@ -1,9 +1,11 @@
-import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Speak from "expo-speech";
 import { CheckIcon, LayoutGridIcon, Share2Icon } from "lucide-react-native";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import {
   ActivityIndicator,
   Alert,
@@ -74,6 +76,8 @@ export default function PaymentSuccessScreen() {
     return recipientName.toLocaleString().charAt(0).toUpperCase();
   }, [recipientName]);
 
+  const languageRef = useRef<string|null>(null);
+
   const handleDone = async () => {
     try {
       setIsButtonLoading(true);
@@ -141,6 +145,30 @@ export default function PaymentSuccessScreen() {
     );
     // Implement sharing functionality
   };
+
+  const speakInstruction = async()=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+
+    let speaktext = "";
+    if(languageRef.current === "en"){
+      speaktext = "Payment Successful. Click on `Done` button";
+    }else{
+      speaktext = "भुगतान सफल हुआ। ‘Done’ बटन पर क्लिक करें।";
+    }
+
+    Speak.speak(speaktext, {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
+
+  useEffect(()=>{
+    speakInstruction();
+  },[]);
 
   
 

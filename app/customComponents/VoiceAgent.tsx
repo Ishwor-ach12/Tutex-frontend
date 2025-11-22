@@ -26,7 +26,7 @@ type ParsedResponse = {
   text: string;
 };
 
-const langMap: { [key: string]: string[] } = {
+export const langMap: { [key: string]: string[] } = {
   en: [
     "en-US",
     "english",
@@ -45,14 +45,16 @@ export const VoiceAgent = ({
   tutorialName,
   uiHandlerFunction,
   size,
-  introduce,
-  currentStepRef
+  introduce = false,
+  currentStepRef,
+  onStateChange = () => {},
 }: {
   tutorialName: string,
   uiHandlerFunction: (locationRef: string) => void,
   size: number,
-  introduce: Boolean,
-  currentStepRef:React.RefObject<number>
+  introduce?: Boolean,
+  currentStepRef:React.RefObject<number>,
+  onStateChange?: (newState: AgentState) => void,
 }) => {
   const [state, setState] = useState<AgentState>("idle");
   const stateRef = useRef<AgentState>(state);
@@ -103,6 +105,7 @@ export const VoiceAgent = ({
 
   useEffect(() => {
     stateRef.current = state;
+    onStateChange(state);
     if (state == "listening") {
       startListening();
     } else if (state == "processing") {
@@ -192,6 +195,7 @@ export const VoiceAgent = ({
 
   //start speaking
   const startSpeaking = () => {
+    console.log(messagesRef.current.length);
     uiHandlerFunction(agentResponse.current.highlight);
     Speak.speak(agentResponse.current.text, {
       language: langMap[language.current][0],
@@ -218,7 +222,10 @@ export const VoiceAgent = ({
       //it means user is interrupting the current state
       setDisabled(true);
       setState("idle");
-    } else setState("listening");
+    } else {
+      Speak.stop();
+      setState("listening")
+    }
   };
 
   return (

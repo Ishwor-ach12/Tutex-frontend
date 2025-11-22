@@ -1,4 +1,4 @@
-import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
 import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -12,6 +12,9 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 // FIX: Using core React Native components
+import { AgentState } from "@/app/customComponents/AIAgentIcon";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Speak from "expo-speech";
 import {
   Alert,
   Dimensions,
@@ -22,6 +25,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 
 interface PaymentData {
   amount: string;
@@ -238,6 +242,9 @@ export default function PaymentPinScreen() {
   const amount = parsed.amount;
   const recipientName = parsed.recipientName;
   const isFocused = useIsFocused();
+  const languageRef = useRef<string|null>(null);
+  const [aiOn, setAiOn] = useState(false);
+  
 
   // State definitions
   const [pin, setPin] = useState<string>("");
@@ -287,8 +294,23 @@ export default function PaymentPinScreen() {
     if (pin == CORRECT_PIN) setCurrentStep(currentStep + 1);
   }, [pin]);
 
+  const speakInstruction = async(step:number)=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(WALKTHROUGH_STEPS[step].description), {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
+
+
   useEffect(()=>{
-      currentStepRef.current = currentStep;
+        currentStepRef.current = currentStep;
+        Speak.stop();
+        speakInstruction(currentStep);
     },[currentStep]);
   
   // Render the PIN input display (dashes/dots)
@@ -426,6 +448,7 @@ export default function PaymentPinScreen() {
               }}
               introduce={false}
               currentStepRef={currentStepRef}
+              onStateChange={(state:AgentState) => {if(state === "idle") setAiOn(false); else setAiOn(true)}}
             />
           </View>}
       <View
@@ -462,7 +485,7 @@ export default function PaymentPinScreen() {
 
         {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
           <View style={styles.tooltipButtons}>
-            {currentStep > 0 ? (
+            {currentStep > 0 && !aiOn ? (
               <TouchableOpacity onPress={handlePreviousStep}>
                 <Text style={styles.prevButton}>Prev</Text>
               </TouchableOpacity>
@@ -471,9 +494,9 @@ export default function PaymentPinScreen() {
                 <Text></Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={handleNextStep}>
+            {!aiOn && <TouchableOpacity onPress={handleNextStep}>
               <Text style={styles.nextButton}>Next</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         ) : (
           console.log("enterPin", currentStep),

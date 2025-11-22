@@ -1,12 +1,14 @@
 // QR Scanner Page - React Native with Expo
 // File: app/qr.tsx
 
-import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { AgentState } from "@/app/customComponents/AIAgentIcon";
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useTranslation } from "react-i18next";
+import * as Speak from "expo-speech";
 import {
   ArrowLeft,
   Flashlight,
@@ -14,6 +16,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react-native";
 import { default as React, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Dimensions,
@@ -23,6 +26,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -74,8 +79,14 @@ export default function QRScanner() {
     height: 0,
     visible: false,
   });
+  const languageRef = useRef<string|null>(null);
+  const [aiOn, setAiOn] = useState(false);
+
 
   useEffect(() => {
+    currentStepRef.current = currentStep;
+    Speak.stop();
+    speakInstruction(currentStep);
     if (currentStep === 1) {
       // Give layout a moment
       setTimeout(() => {
@@ -97,15 +108,11 @@ export default function QRScanner() {
   }, [currentStep]);
 
   useEffect(() => {
-    // Request camera permission on mount
     if (!permission?.granted) {
       requestPermission();
     }
   }, []);
 
-  useEffect(()=>{
-    currentStepRef.current = currentStep;
-  },[currentStep])
 
   // Handle camera lifecycle - activate/deactivate when screen is focused/unfocused
   useFocusEffect(
@@ -139,6 +146,18 @@ export default function QRScanner() {
     // Navigate to enter amount page
     router.push("./enterAmount");
   };
+
+  const speakInstruction = async(step:number)=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(WALKTHROUGH_STEPS[step].description), {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
 
   // Handle next step
 
@@ -224,14 +243,15 @@ export default function QRScanner() {
 
 
   return (
-    <View style={styles.container}>
-      {isFocused && <View
+    <View style={styles.container} >
+      {isFocused && <TouchableOpacity
         style={{
           position: "absolute",
           top: 50,
           right: 20,
           zIndex: 500,
         }}
+
       >
         <VoiceAgent
           tutorialName="UPI_MB_2"
@@ -240,13 +260,14 @@ export default function QRScanner() {
             const step = parseInt(num);
             if (!isNaN(step)) {
 
-              setCurrentStep(Math.min(currentStep,step));
+              setCurrentStep(step);
             }
           }}
           introduce={false}
           currentStepRef={currentStepRef}
+          onStateChange={(state:AgentState) => {if(state === "idle") setAiOn(false); else setAiOn(true)}}
         />
-      </View>}
+      </TouchableOpacity>}
       <View
         style={[
           {
@@ -281,7 +302,7 @@ export default function QRScanner() {
         </Text>
 
         <View style={styles.tooltipButtons}>
-          {currentStep > 0 ? (
+          {currentStep > 0 && !aiOn ? (
             <TouchableOpacity onPress={handlePreviousStep}>
               <Text style={styles.prevButton}>Prev</Text>
             </TouchableOpacity>
@@ -290,9 +311,9 @@ export default function QRScanner() {
               <Text></Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={handleNextStep}>
+          {!aiOn && <TouchableOpacity onPress={handleNextStep}>
             <Text style={styles.nextButton}>Next</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>}
         </View>
       </View>
       {currentStep == 0 && (
@@ -319,7 +340,7 @@ export default function QRScanner() {
             styles.highlightUploadQR,
             {
               left: highlightBox.x,
-              top: highlightBox.y,
+              top: highlightBox.y+10,
               width: highlightBox.width,
               height: highlightBox.height,
             },
@@ -530,6 +551,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#fff",
     fontWeight: "500",
+    width: 100
   },
   loadingText: {
     flex: 1,
