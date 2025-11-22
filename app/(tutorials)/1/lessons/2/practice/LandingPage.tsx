@@ -33,6 +33,7 @@ export default function PhonePeLanding() {
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showHeader, setShowHeader] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(0);
 
   // Animated values for header fade-in
   const headerOpacity = scrollY.interpolate({

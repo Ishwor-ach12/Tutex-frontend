@@ -1,24 +1,17 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CircleCheck,
-  Delete,
-  Dot,
-  Minus,
-} from "lucide-react-native";
+import { ChevronDownIcon, ChevronUpIcon, CircleCheck, Delete, Dot, Minus } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import {useTranslation } from "react-i18next";
 // FIX: Using core React Native components
 import {
-  Alert,
-  Dimensions,
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Dimensions,
+    Image,
+    Modal,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 interface PaymentData {
@@ -34,14 +27,12 @@ interface KeypadButtonProps {
   onPress: (value: string) => void;
   isAction: boolean;
   isCheckButton: boolean;
-  currentStep: number;
 }
 
 // 3. Interface for Keypad component props
 interface KeypadProps {
   onKeyPress: (key: string) => void;
   pin: string;
-  currentStep: number;
 }
 
 // 4. Interface for Icon placeholders
@@ -53,53 +44,7 @@ interface IconProps {
 
 const CORRECT_PIN: string = "0000"; // Sample correct PIN
 const PIN_LENGTH: number = 4;
-const { width, height } = Dimensions.get("window");
-
-
-const WALKTHROUGH_STEPS = [
-  {
-    id: 1,
-    title: "qr_tutorial.enter_pin1_title",
-    description:
-      "qr_tutorial.enter_pin1_description",
-    top: "25%",
-    requiresAction: false,
-  },
-  {
-    id: 2,
-    title: "qr_tutorial.enter_pin2_title",
-    description:
-      "qr_tutorial.enter_pin2_description",
-    top: "30%",
-    requiresAction: false,
-  },
-  {
-    id: 3,
-    title: "qr_tutorial.enter_pin3_title",
-    description:
-      "qr_tutorial.enter_pin3_description",
-    top: "50%",
-    requiresAction: false,
-  },
-  {
-    id: 4,
-    title: "qr_tutorial.enter_pin4_title",
-    description:
-      "qr_tutorial.enter_pin4_description",
-    top: "37%",
-    requiresAction: true,
-    actionText: "qr_tutorial.enter_pin4_actiontext",
-  },
-  {
-    id: 5,
-    title: "qr_tutorial.enter_pin5_title",
-    description:
-      "qr_tutorial.enter_pin5_description",
-    top: "37%",
-    requiresAction: true,
-    actionText: "qr_tutorial.enter_pin5_actiontext",
-  },
-];
+const { width } = Dimensions.get("window");
 
 // --- Component for Keypad Button ---
 const KeypadButton: React.FC<KeypadButtonProps> = ({
@@ -107,7 +52,6 @@ const KeypadButton: React.FC<KeypadButtonProps> = ({
   onPress,
   isAction,
   isCheckButton,
-  currentStep,
 }) => (
   <TouchableOpacity
     style={[
@@ -123,25 +67,7 @@ const KeypadButton: React.FC<KeypadButtonProps> = ({
       <Delete size={32} color="#000" />
     ) : value === "check" ? (
       // Use CheckIcon placeholder
-      currentStep == 4 ? (
-        <View
-          style={{
-            backgroundColor: "#fff", // 🔥 REQUIRED
-            borderRadius: 50,
-            padding: 4,
-
-            elevation: 20, // Android
-            shadowColor: "#000", // iOS
-            shadowOpacity: 0.3,
-            shadowRadius: 6,
-            shadowOffset: { width: 0, height: 4 },
-          }}
-        >
-          <CircleCheck size={32} color="#15ff00ff" />
-        </View>
-      ) : (
-        <CircleCheck size={32} color="#000000ff" />
-      )
+      <CircleCheck size={32} color="#000000ff" />
     ) : (
       <Text style={styles.keypadText}>{value}</Text>
     )}
@@ -149,7 +75,7 @@ const KeypadButton: React.FC<KeypadButtonProps> = ({
 );
 
 // --- Component for Keypad Grid ---
-const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
+const Keypad: React.FC<KeypadProps> = ({ onKeyPress }) => {
   const keys: string[] = [
     "1",
     "2",
@@ -191,7 +117,6 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
               onPress={handlePress}
               isAction={true}
               isCheckButton={false}
-              currentStep={currentStep}
             />
           );
         }
@@ -205,7 +130,6 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
               onPress={handlePress}
               isAction={true}
               isCheckButton={true}
-              currentStep={currentStep}
             />
           );
         }
@@ -217,7 +141,6 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
             onPress={handlePress}
             isAction={false}
             isCheckButton={false}
-            currentStep={currentStep}
           />
         );
       })}
@@ -227,20 +150,23 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
 
 // --- Main Screen Component ---
 export default function PaymentPinScreen() {
-  const {t} = useTranslation();
-  const router = useRouter();
+    const router = useRouter();
   const { data } = useLocalSearchParams();
   const parsed = data ? JSON.parse(data as string) : {};
-  const refId = "ABC123a1b2abc123a1234a500c4SJ78Bajbae30e01bcfdxa";
-  const refUrl = "https://phonepe.com";
-  const amount = parsed.amount;
-  const recipientName = parsed.recipientName;
+  const refId = "ABC123a1b2abc123a1234a500c4SJ78Bajbae30e01bcfdxa"
+  const refUrl = "https://phonepe.com"
+  const amount = parsed.amount
+  const recipientName = parsed.recipientName
 
   // State definitions
   const [pin, setPin] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [pinError, setPinError] = useState<boolean>(false);
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState<number>(3)
+
+  useEffect(()=>{
+    if(pin == "0000") setCurrentStep(4)
+  }, [pin])
 
   const handleKeyPress = (key: string): void => {
     setPinError(false);
@@ -251,9 +177,10 @@ export default function PaymentPinScreen() {
       if (pin.length === PIN_LENGTH) {
         if (pin === CORRECT_PIN) {
           router.push({
-            pathname: "./paymentSuccess",
-            params: { amount, refId, recipientName },
-          });
+            pathname : "./paymentSuccess",
+            params :{ amount, refId, recipientName}
+          }
+          );
         } else {
           setPinError(true);
           setPin("");
@@ -269,26 +196,11 @@ export default function PaymentPinScreen() {
     }
   };
 
-  const handleNextStep = () => {
-    if (currentStep < WALKTHROUGH_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-  const handlePreviousStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  useEffect(() => {
-    if (pin == CORRECT_PIN) setCurrentStep(currentStep + 1);
-  }, [pin]);
-
   // Render the PIN input display (dashes/dots)
   const renderPinInput = () => {
     const pinArray = Array.from({ length: PIN_LENGTH }, (_, i: number) => {
       const isEntered: boolean = i < pin.length;
-      const content = isEntered ? <Dot size={56} /> : <Minus size={56} />; // Dot for entered, dash for empty
+      const content = isEntered ? (<Dot size={56}/>) : (<Minus size={56}/>); // Dot for entered, dash for empty
 
       return (
         <Text
@@ -304,7 +216,7 @@ export default function PaymentPinScreen() {
       );
     });
 
-    return <View style={[styles.pinInputContainer]}>{pinArray}</View>;
+    return <View style={styles.pinInputContainer}>{pinArray}</View>;
   };
 
   // --- Modal Content (Transaction Details) ---
@@ -316,27 +228,19 @@ export default function PaymentPinScreen() {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        onPress={() => setModalVisible(false)}
-      >
+      <TouchableOpacity style={styles.modalOverlay} onPress={()=>setModalVisible(false)}>
         <View style={styles.modalContent}>
           {/* Header bar mimicking the top of the second image */}
           <View style={styles.modalHeader}>
             <View style={styles.bankAndUpiContainer}>
               <View>
-                <Text style={styles.modalBankName}>
-                  {parsed.senderBankName}
-                </Text>
+                <Text style={styles.modalBankName}>{parsed.senderBankName}</Text>
                 <Text style={styles.modalAccountNum}>
                   XXXX{parsed.senderAccountLast4}
                 </Text>
               </View>
               {/* UPI Logo Placeholder */}
-              <Image
-                source={require("@/assets/images/phonepeTutorial/upi_logo.png")}
-                style={styles.upiLogoPlaceholder}
-              />
+              <Image source={require("@/assets/images/phonepeTutorial/upi_logo.png")} style={styles.upiLogoPlaceholder}/>
             </View>
             <View style={styles.modalSeparator} />
 
@@ -347,9 +251,7 @@ export default function PaymentPinScreen() {
                 <Text style={styles.modalLabel}>Sending:</Text>
               </View>
               <View style={{ alignItems: "flex-end" }}>
-                <Text style={styles.modalRecipientText}>
-                  {parsed.recipientName}
-                </Text>
+                <Text style={styles.modalRecipientText}>{parsed.recipientName}</Text>
                 <View style={styles.modalAmountContainer}>
                   <Text style={styles.modalAmountText}>₹ {parsed.amount}</Text>
                   {/* Collapse button (inside modal) uses ChevronUpIcon placeholder */}
@@ -369,9 +271,7 @@ export default function PaymentPinScreen() {
           <View style={styles.modalBody}>
             <View style={styles.modalDetailRow}>
               <Text style={styles.modalDetailLabel}>PAYING TO</Text>
-              <Text style={styles.modalDetailValue}>
-                {parsed.recipientName}
-              </Text>
+              <Text style={styles.modalDetailValue}>{parsed.recipientName}</Text>
             </View>
             <View style={styles.modalDetailRow}>
               <Text style={styles.modalDetailLabel}>AMOUNT</Text>
@@ -398,176 +298,96 @@ export default function PaymentPinScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <View
-        style={[
-          {
-            position: "absolute",
-            width: width,
-            height: height + 100,
-            backgroundColor: "#0000008f",
-            zIndex: 10,
-          },
-        ]}
-      />
-      <View
-        style={{
-          position: "absolute",
-          backgroundColor: "#fff",
-          width: width / 1.2,
-          padding: 24,
-          zIndex: 10,
-          top: WALKTHROUGH_STEPS[currentStep].top,
-          left: "50%",
-          transform: [{ translateX: -(width / 1.2 / 2) }],
-          elevation: 100,
-          borderRadius: 10,
-        }}
-      >
-        <Text style={styles.tooltipTitle}>
-          {t(WALKTHROUGH_STEPS[currentStep].title)}
-        </Text>
-        <Text style={styles.tooltipDescription}>
-          {t(WALKTHROUGH_STEPS[currentStep].description)}
-        </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* --- Header Section (Top bar) --- */}
+        <View style={styles.header}>
+          <View style={styles.bankAndUpiContainer}>
+            <View>
+              <Text style={styles.bankName}>{parsed.senderBankName}</Text>
+              <Text style={styles.accountNum}>XXXX{parsed.senderAccountLast4}</Text>
+            </View>
+            {/* UPI Logo Placeholder */}
+                          <Image source={require("@/assets/images/phonepeTutorial/upi_logo.png")} style={styles.upiLogoPlaceholder}/>
 
-        {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
-          <View style={styles.tooltipButtons}>
-            {currentStep > 0 ? (
-              <TouchableOpacity onPress={handlePreviousStep}>
-                <Text style={styles.prevButton}>Prev</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity>
-                <Text></Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity onPress={handleNextStep}>
-              <Text style={styles.nextButton}>Next</Text>
-            </TouchableOpacity>
           </View>
-        ) : (
-          console.log("enterPin", currentStep),
-          
-          <Text
-            style={{
-              textAlign: "center",
-              padding: 8,
-              fontSize: 16,
-              color: "#9c27b0",
-              fontWeight: "bold",
-            }}
-          >
+          <View style={styles.separator} />
 
-            {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
-          </Text>
-        )}
-      </View>
-      {/* --- Header Section (Top bar) --- */}
-      <View style={styles.header}>
-        <View style={styles.bankAndUpiContainer}>
-          <View>
-            <Text style={styles.bankName}>{parsed.senderBankName}</Text>
-            <Text style={styles.accountNum}>
-              XXXX{parsed.senderAccountLast4}
-            </Text>
-          </View>
-          {/* UPI Logo Placeholder */}
-          <Image
-            source={require("@/assets/images/phonepeTutorial/upi_logo.png")}
-            style={styles.upiLogoPlaceholder}
-          />
-        </View>
-        <View style={styles.separator} />
-
-        <View
-          style={[
-            styles.recipientAndAmountContainer,
-            currentStep == 0 && styles.highlightedItem,
-          ]}
-        >
-          <View>
-            <Text style={styles.recipientLabel}>To:</Text>
-            <Text style={styles.recipientLabel}>Sending:</Text>
-          </View>
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={styles.recipientNameText}>
-              {parsed.recipientName.length > 20
-                ? parsed.recipientName.substring(0, 20) + "..."
-                : parsed.recipientName}
-            </Text>
-            {/* Dropdown next to amount */}
-            <View style={styles.amountContainer}>
-              <Text style={styles.amountText}>₹ {parsed.amount}</Text>
-              {/* Dropdown button uses ChevronDownIcon placeholder */}
-              <TouchableOpacity
-                onPress={() => setModalVisible(true)}
-                style={styles.dropdownButton}
-              >
-                <ChevronDownIcon size={24} color="#000" />
-              </TouchableOpacity>
+          <View style={styles.recipientAndAmountContainer}>
+            <View>
+              <Text style={styles.recipientLabel}>To:</Text>
+              <Text style={styles.recipientLabel}>Sending:</Text>
+            </View>
+            <View style={{ alignItems: "flex-end" }}>
+              <Text style={styles.recipientNameText}>
+                {parsed.recipientName.length > 20
+                  ? parsed.recipientName.substring(0, 20) + "..."
+                  : parsed.recipientName}
+              </Text>
+              {/* Dropdown next to amount */}
+              <View style={styles.amountContainer}>
+                <Text style={styles.amountText}>₹ {parsed.amount}</Text>
+                {/* Dropdown button uses ChevronDownIcon placeholder */}
+                <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
+                  style={styles.dropdownButton}
+                >
+                  <ChevronDownIcon size={24} color="#000" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </View>
 
-      {/* --- PIN Entry Section --- */}
-      <View
-        style={[
-          styles.pinEntrySection,
-          (currentStep == 2 || currentStep == 3) && styles.highlightedItem,
-        ]}
-      >
-        <Text style={styles.pinEntryText}>
-          ENTER {PIN_LENGTH}-DIGIT UPI PIN
-        </Text>
-        {renderPinInput()}
-      </View>
+        {/* --- PIN Entry Section --- */}
+        <View style={styles.pinEntrySection}>
+          <Text style={styles.pinEntryText}>
+            ENTER {PIN_LENGTH}-DIGIT UPI PIN
+          </Text>
+          {renderPinInput()}
+        </View>
 
-      {/* --- Warning Banner --- */}
-      <View style={styles.warningBanner}>
-        <View style={styles.warningIcon}>
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-            !
+        {/* --- Warning Banner --- */}
+        <View style={styles.warningBanner}>
+            <View style={styles.warningIcon}>
+
+          <Text style={{color: "#fff", fontSize: 18, fontWeight: "bold"}}>!</Text>
+            </View>
+          <Text style={styles.warningText}>
+            You are transferring money from your{" "}
+            <Text style={{ fontWeight: "bold" }}>{parsed.senderBankName}</Text> account
+            to <Text style={{ fontWeight: "bold" }}>{parsed.recipientName}</Text>
           </Text>
         </View>
-        <Text style={styles.warningText}>
-          You are transferring money from your{" "}
-          <Text style={{ fontWeight: "bold" }}>{parsed.senderBankName}</Text>{" "}
-          account to{" "}
-          <Text style={{ fontWeight: "bold" }}>{parsed.recipientName}</Text>
-        </Text>
+
+        <View style={styles.spacer} />
+
+        {/* --- Keypad --- */}
+        <Keypad onKeyPress={handleKeyPress} pin={pin} />
       </View>
 
-      <View style={styles.spacer} />
-
-      {/* --- Keypad --- */}
-      <View
-        style={[
-          currentStep == 3 && styles.highlightedItem,
-          currentStep == 4 && styles.highlightedItem2,
-        ]}
-      >
-        <Keypad
-          onKeyPress={handleKeyPress}
-          pin={pin}
-          currentStep={currentStep}
-        />
-      </View>
+      {/* --- Modal for Detailed Transaction View --- */}
       <TransactionDetailsModal />
-    </View>
+    </SafeAreaView>
   );
 }
 
+// --- Stylesheet ---
+// Since this is a React Native environment, StyleSheet.create is used as intended.
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 0,
-    marginTop: 32,
   },
   // --- Header Styles ---
   header: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
     backgroundColor: "#fff",
   },
   bankAndUpiContainer: {
@@ -575,8 +395,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingBottom: 8,
-    paddingHorizontal: 16,
-    paddingTop: 10,
   },
   bankName: {
     fontSize: 14,
@@ -592,7 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     justifyContent: "center",
     alignItems: "center",
-    objectFit: "contain",
+    objectFit: "contain"
   },
   separator: {
     height: 1,
@@ -604,8 +422,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingBottom: 20,
-    paddingHorizontal: 16,
-    paddingTop: 10,
   },
   recipientLabel: {
     fontSize: 14,
@@ -674,9 +490,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
     width: 28,
     height: 28,
-    backgroundColor: "#d4740eff",
+    backgroundColor:"#d4740eff",
     borderRadius: "100%",
-    alignItems: "center",
+    alignItems: "center"
   },
   warningText: {
     fontSize: 12,
@@ -694,7 +510,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     width: width, // Full width
     paddingBottom: 20,
-    backgroundColor: "#eef0f5ff",
+    backgroundColor: "#eef0f5ff"
   },
   keypadButton: {
     width: width / 3, // Three buttons per row
@@ -720,7 +536,7 @@ const styles = StyleSheet.create({
   },
 
   // --- Modal Styles (Second Image) ---
-  modalOverlay: {
+  modalOverlay:{
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)", // Semi-transparent overlay
     justifyContent: "flex-start", // Modal content starts from top
@@ -806,48 +622,5 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     width: "80%",
     textAlign: "right",
-  },
-  tooltipTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#000",
-  },
-  tooltipDescription: {
-    fontSize: 16,
-    color: "#555",
-    marginBottom: 12,
-  },
-  tooltipButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  prevButton: {
-    fontWeight: "bold",
-    paddingVertical: 6,
-    paddingHorizontal: 32,
-    fontSize: 18,
-    borderRadius: 5,
-    color: "#5f259f",
-    borderWidth: 2,
-    borderColor: "#5f259f",
-  },
-  nextButton: {
-    backgroundColor: "#5f259f",
-    fontWeight: "bold",
-    color: "#fff",
-    paddingVertical: 8,
-    paddingHorizontal: 32,
-    fontSize: 18,
-    borderRadius: 5,
-  },
-  highlightedItem: {
-    zIndex: 9999,
-    backgroundColor: "#fff",
-  },
-  highlightedItem2: {
-    zIndex: 9999,
-    backgroundColor: "#bcbcbcff",
   },
 });

@@ -1,30 +1,33 @@
+// PhonePe Landing Page - React Native with Expo Router
+// File: app/(main)/index.tsx
+
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 // Lucide React Native icons
 import {
-  BadgePercent,
-  Bell,
-  Building2,
-  Car,
-  Clock,
-  HelpCircle,
-  Home,
-  Lightbulb,
-  Megaphone,
-  Phone,
-  QrCode,
-  Search,
-  Smartphone,
-  Wallet,
+    BadgePercent,
+    Bell,
+    Building2,
+    Car,
+    Clock,
+    HelpCircle,
+    Home,
+    Lightbulb,
+    Megaphone,
+    Phone,
+    QrCode,
+    Search,
+    Smartphone,
+    Wallet,
 } from "lucide-react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -33,6 +36,7 @@ export default function PhonePeLanding() {
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showHeader, setShowHeader] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(0);
 
   // Animated values for header fade-in
   const headerOpacity = scrollY.interpolate({
@@ -139,22 +143,17 @@ export default function PhonePeLanding() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Money Transfers</Text>
             <View style={styles.iconRow}>
-
-              {/* ✅ To Mobile Number */}
-              <TouchableOpacity
-                style={styles.iconButton}
-                onPress={() => router.push("./sendMoney")}
-              >
+              <View style={styles.iconButton}>
                 <View style={styles.iconCircle}>
                   <View style={styles.iconBox}>
                     <Phone size={30} color="#491359ff" />
+
                     <View style={styles.activeDot} />
                   </View>
                 </View>
                 <Text style={styles.iconLabel}>To Mobile{"\n"}Number</Text>
-              </TouchableOpacity>
+              </View>
 
-              {/* To Bank & Self A/c */}
               <View style={styles.iconButton}>
                 <View style={styles.iconCircle}>
                   <View style={styles.iconBox}>
@@ -164,7 +163,6 @@ export default function PhonePeLanding() {
                 <Text style={styles.iconLabel}>To Bank &{"\n"}Self A/c</Text>
               </View>
 
-              {/* Refer & Get ₹200 */}
               <View style={styles.iconButton}>
                 <View style={styles.iconCircle}>
                   <View style={styles.iconBox}>
@@ -174,7 +172,6 @@ export default function PhonePeLanding() {
                 <Text style={styles.iconLabel}>Refer & Get{"\n"}₹200</Text>
               </View>
 
-              {/* Check Balance */}
               <View style={styles.iconButton}>
                 <View style={styles.iconCircle}>
                   <View style={styles.iconBox}>
@@ -183,10 +180,8 @@ export default function PhonePeLanding() {
                 </View>
                 <Text style={styles.iconLabel}>Check{"\n"}Balance</Text>
               </View>
-
             </View>
           </View>
-
 
           {/* Recharge & Bills Section */}
           <View style={styles.section2}>
@@ -257,7 +252,7 @@ export default function PhonePeLanding() {
                 <Text style={styles.cardSubtitle}>
                   Flight, Train, Bus, Hotel, Metro
                 </Text>
-                <Text style={styles.offerText}>Hotels Sale</Text>
+                  <Text style={styles.offerText}>Hotels Sale</Text>
                 <Image source={require('@/assets/images/phonepeTutorial/travel.png')} style={styles.cardImage} />
               </TouchableOpacity>
             </View>
