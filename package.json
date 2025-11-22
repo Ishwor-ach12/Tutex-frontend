@@ -41,6 +41,7 @@
     "expo-symbols": "~1.0.7",
     "expo-system-ui": "~6.0.7",
     "expo-web-browser": "~15.0.8",
+    "fetch": "^1.1.0",
     "i18next": "^25.6.0",
     "lucide-react-native": "^0.546.0",
     "react": "19.1.0",

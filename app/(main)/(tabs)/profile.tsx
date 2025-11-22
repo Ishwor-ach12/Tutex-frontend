@@ -1,19 +1,26 @@
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router, useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router, useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export interface UserProfileType {
   profileId: number;
   name: string;
-  gender: "M" | "F" | string; // assuming gender could be other values too
-  dob: string; // ISO date string
+  gender: "M" | "F" | string;
+  dob: string;
   email: string;
   profileUrl: string | null;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
   userId: number;
 }
 
@@ -22,11 +29,14 @@ const handlePress = (title: string) => {
   console.log(`Action: ${title} pressed`);
 };
 
-
-
 // --- Reusable Component 1: ProfileHeader ---
-const ProfileHeader = ({ user, onEditPress }: { user: UserProfileType | null; onEditPress: () => void }) => {
-
+const ProfileHeader = ({
+  user,
+  onEditPress,
+}: {
+  user: UserProfileType | null;
+  onEditPress: () => void;
+}) => {
   const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
     const today = new Date();
@@ -47,7 +57,10 @@ const ProfileHeader = ({ user, onEditPress }: { user: UserProfileType | null; on
       {/* Avatar Section */}
       <View style={styles.avatarContainer}>
         {user.profileUrl ? (
-          <Image source={{ uri: user.profileUrl }} style={styles.avatarPlaceholder} />
+          <Image
+            source={{ uri: user.profileUrl }}
+            style={styles.avatarPlaceholder}
+          />
         ) : (
           <View style={styles.avatarPlaceholder} />
         )}
@@ -58,7 +71,7 @@ const ProfileHeader = ({ user, onEditPress }: { user: UserProfileType | null; on
         <Text style={styles.usernameText}>{user.name}</Text>
         <Text style={styles.detailText}>{user.email}</Text>
         <Text style={styles.detailText}>Age: {age}</Text>
-        <Text style={styles.detailText}>Gender: {user.gender || 'N/A'}</Text>
+        <Text style={styles.detailText}>Gender: {user.gender || "N/A"}</Text>
 
         {/* Edit Button */}
         <TouchableOpacity style={styles.editButton} onPress={onEditPress}>
@@ -70,17 +83,35 @@ const ProfileHeader = ({ user, onEditPress }: { user: UserProfileType | null; on
 };
 
 // --- Reusable Component 2: SettingItem ---
-const SettingItem = ({ title, iconName, isSignout = false, onPress }: { title: string; iconName: string; isSignout?: boolean; onPress: (title: string) => void }) => {
+const SettingItem = ({
+  title,
+  iconName,
+  isSignout = false,
+  onPress,
+}: {
+  title: string;
+  iconName: string;
+  isSignout?: boolean;
+  onPress: () => void;
+}) => {
   return (
     <TouchableOpacity
-      style={[styles.settingItem, isSignout ? styles.signoutItem : styles.defaultItem]}
-      onPress={() => onPress(title)}
+      style={[
+        styles.settingItem,
+        isSignout ? styles.signoutItem : styles.defaultItem,
+      ]}
+      onPress={onPress}
     >
       <View style={styles.settingContent}>
-        {Ionicons && (
-          <Ionicons size={24} color={isSignout ? '#E53E3E' : '#4A5568'} style={styles.icon} />
-        )}
-        <Text style={[styles.settingTitle, isSignout && styles.signoutText]}>{title}</Text>
+        <Ionicons
+          name={iconName as any}
+          size={24}
+          color={isSignout ? "#E53E3E" : "#4A5568"}
+          style={styles.icon}
+        />
+        <Text style={[styles.settingTitle, isSignout && styles.signoutText]}>
+          {title}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -88,18 +119,43 @@ const SettingItem = ({ title, iconName, isSignout = false, onPress }: { title: s
 
 // --- Main Component: Profile (App) ---
 const settingsList = [
-  { title: 'My Learning Progress', icon: 'bar-chart-outline', action: 'progress' },
-  { title: 'Accessibility Settings', icon: 'contrast-outline', action: 'accessibility' },
-  { title: 'Change Password & Security', icon: 'lock-closed-outline', action: 'security' },
-  { title: 'Language Preferences', icon: 'language-outline', action: 'language' },
-  { title: 'Notification Settings', icon: 'notifications-outline', action: 'notifications' },
-  { title: 'Help & Feedback', icon: 'help-circle-outline', action: 'help' },
-  { title: 'Terms of Use & Privacy', icon: 'document-text-outline', action: 'legal' },
+  {
+    title: "My Learning Progress",
+    icon: "bar-chart-outline",
+    action: "progress",
+  },
+  {
+    title: "Accessibility Settings",
+    icon: "contrast-outline",
+    action: "accessibility",
+  },
+  {
+    title: "Change Password & Security",
+    icon: "lock-closed-outline",
+    action: "change_password",
+  },
+  {
+    title: "Language Preferences",
+    icon: "language-outline",
+    action: "language",
+  },
+  {
+    title: "Notification Settings",
+    icon: "notifications-outline",
+    action: "notifications",
+  },
+  { title: "Help & Feedback", icon: "help-circle-outline", action: "help" },
+  {
+    title: "Terms of Use & Privacy",
+    icon: "document-text-outline",
+    action: "legal",
+  },
 ];
 
 export default function Profile() {
   const [userProfile, setUserProfile] = useState<UserProfileType | null>(null);
   const router = useRouter();
+
   useFocusEffect(
     useCallback(() => {
       const loadProfile = async () => {
@@ -119,23 +175,35 @@ export default function Profile() {
 
   const onEditProfile = () => {
     router.push({
-    pathname: "/(main)/(tabs)/edit-profile",
-    params: {
-      name: userProfile?.name,
-      dob: userProfile?.dob,
-      gender: userProfile?.gender,
-      email: userProfile?.email,
-      profileUrl: userProfile?.profileUrl ?? "",
-      userId: String(userProfile?.userId),
+      pathname: "/(main)/(tabs)/edit-profile",
+      params: {
+        name: userProfile?.name,
+        dob: userProfile?.dob,
+        gender: userProfile?.gender,
+        email: userProfile?.email,
+        profileUrl: userProfile?.profileUrl ?? "",
+        userId: String(userProfile?.userId),
       },
     });
+  };
+
+  const onSettingPress = (title: string, action: string) => {
+    switch (action) {
+      case "language":
+        router.push("/(main)/(tabs)/language-preference");
+        break;
+      case "security":
+        router.push("/(main)/(tabs)/changePassword");
+        break;
+      default:
+        console.log("Pressed:", title);
+    }
   };
 
   const onSignOut = async () => {
     await AsyncStorage.removeItem("userProfile");
     await AsyncStorage.removeItem("authToken");
-
-    router.replace("/(auth)/Login")
+    router.replace("/(auth)/Login");
   };
 
   return (
@@ -144,12 +212,12 @@ export default function Profile() {
         <ProfileHeader user={userProfile} onEditPress={onEditProfile} />
 
         <View style={styles.settingsList}>
-          {settingsList.map(item => (
+          {settingsList.map((item) => (
             <SettingItem
               key={item.title}
               title={item.title}
               iconName={item.icon}
-              onPress={() => handlePress(item.title)}
+              onPress={() => onSettingPress(item.title, item.action)}
             />
           ))}
 
@@ -167,12 +235,12 @@ export default function Profile() {
 
 // --- Stylesheet ---
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F7FAFC' },
+  safeArea: { flex: 1, backgroundColor: "#F7FAFC" },
   container: { flex: 1 },
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     padding: 20,
     paddingVertical: 40,
     borderRadius: 12,
@@ -183,18 +251,53 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   avatarContainer: { marginRight: 20 },
-  avatarPlaceholder: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#E2E8F0', borderWidth: 2, borderColor: '#CBD5E0' },
-  infoContainer: { flex: 1, position: 'relative', justifyContent: 'center' },
-  usernameText: { fontSize: 20, fontWeight: '700', color: '#2D3748', marginBottom: 2 },
-  detailText: { fontSize: 14, color: '#718096', lineHeight: 20 },
-  editButton: { position: 'absolute', top: 0, right: 0, backgroundColor: '#4299E1', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  editButtonText: { color: 'white', fontWeight: '600', fontSize: 14 },
+  avatarPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#E2E8F0",
+    borderWidth: 2,
+    borderColor: "#CBD5E0",
+  },
+  infoContainer: { flex: 1, position: "relative", justifyContent: "center" },
+  usernameText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#2D3748",
+    marginBottom: 2,
+  },
+  detailText: { fontSize: 14, color: "#718096", lineHeight: 20 },
+  editButton: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    backgroundColor: "#4299E1",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  editButtonText: { color: "white", fontWeight: "600", fontSize: 14 },
   settingsList: { marginTop: 20 },
-  settingItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 25, paddingHorizontal: 15, backgroundColor: 'white', borderBottomWidth: 1, borderColor: '#EDF2F7' },
+  settingItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 25,
+    paddingHorizontal: 15,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderColor: "#EDF2F7",
+  },
   defaultItem: { borderBottomWidth: 1 },
-  signoutItem: { marginTop: 0, borderBottomWidth: 0, borderRadius: 12, paddingVertical: 20, marginBottom: 20 },
-  settingContent: { flexDirection: 'row', alignItems: 'center' },
-  icon: {},
-  settingTitle: { fontSize: 16, color: '#4A5568', fontWeight: '500' },
-  signoutText: { color: '#E53E3E', fontWeight: '600' },
+  signoutItem: {
+    marginTop: 0,
+    borderBottomWidth: 0,
+    borderRadius: 12,
+    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  settingContent: { flexDirection: "row", alignItems: "center" },
+  icon: { marginRight: 7 },
+  settingTitle: { fontSize: 16, color: "#4A5568", fontWeight: "500" },
+  signoutText: { color: "#E53E3E", fontWeight: "600" },
 });
