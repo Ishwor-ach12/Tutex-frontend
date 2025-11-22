@@ -13,14 +13,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const handleLogin = async () => {
     try {
+      setLoading(true);
       const response = await fetch(
         "https://tutex-vq6j.onrender.com/auth/login",
         {
@@ -42,16 +45,18 @@ export default function Login() {
         "userProfile",
         JSON.stringify(data.body["userProfile"])
       );
-      
+
       // redirect user here
       router.replace("/(main)/(tabs)/home");
     } catch (error) {
       Alert.alert("Error", "Cannot connect to server");
       console.log(error);
+    } finally{
+      setLoading(false);
     }
   };
   const handleSignup = () => {
-    router.replace("/(auth)/Signup");
+    router.push("/(auth)/Signup");
   };
 
   return (
@@ -67,7 +72,7 @@ export default function Login() {
         <View style={styles.topSection}>
           <TouchableOpacity
             onPress={() => {
-              router.replace("../(tutorials)/LoginTutorial");
+              router.push("../(tutorials)/LoginTutorial");
             }}
             style={styles.helpButton}
           >
@@ -182,8 +187,18 @@ export default function Login() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity onPress={handleLogin} style={styles.loginBtn}>
-            <Text style={styles.loginText}>Login</Text>
+          <TouchableOpacity
+            onPress={handleLogin}
+            disabled={loading}
+            style={[
+              styles.loginBtn
+            ]}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.loginText}>Login</Text>
+            )}
           </TouchableOpacity>
           <View style={styles.loginButton}>
             <Text style={{ color: "black", fontSize: 18 }}>

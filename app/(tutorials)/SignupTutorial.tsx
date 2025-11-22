@@ -1,10 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import * as Speak from "expo-speech";
 import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Animated,
   Dimensions,
@@ -17,8 +20,10 @@ import {
   TextInput,
   TouchableOpacity,
   UIManager,
-  View
+  View,
 } from "react-native";
+import { AgentState } from "../customComponents/AIAgentIcon";
+import { langMap, VoiceAgent } from "../customComponents/VoiceAgent";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -32,12 +37,13 @@ export default function SignupTutorial() {
   };
 
   const router = useRouter();
-  const { t} = useTranslation();
+  const { t } = useTranslation();
 
   const [currentStep, setCurrentStep] = useState(0);
+  const currentStepRef = useRef<number>(currentStep);
   const [tutorialActive, setTutorialActive] = useState(true);
   const [componentPositions, setComponentPositions] = useState({});
-  
+
   const [form, setForm] = useState<SignupForm>({
     name: "",
     email: "",
@@ -48,10 +54,10 @@ export default function SignupTutorial() {
 
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  
+
   const highlightAnim = useRef(new Animated.Value(1)).current;
   const scrollViewRef = useRef<ScrollView>(null);
-  
+
   const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -59,50 +65,53 @@ export default function SignupTutorial() {
   const genderRef = useRef(null);
   const signupRef = useRef(null);
   const loginRef = useRef(null);
+  const isFocused = useIsFocused();
+  const [aiOn, setAiOn] = useState(false);
+  const languageRef = useRef<string|null>(null);
 
   const tutorialSteps = [
     {
       key: "name",
       titleKey: "signup_tutorial.name_title",
       descriptionKey: "signup_tutorial.name_description",
-      ref: nameRef
+      ref: nameRef,
     },
     {
       key: "email",
       titleKey: "signup_tutorial.email_title",
       descriptionKey: "signup_tutorial.email_description",
-      ref: emailRef
+      ref: emailRef,
     },
     {
-      key: "password", 
+      key: "password",
       titleKey: "signup_tutorial.password_title",
       descriptionKey: "signup_tutorial.password_description",
-      ref: passwordRef
+      ref: passwordRef,
     },
     {
       key: "dob",
       titleKey: "signup_tutorial.dob_title",
       descriptionKey: "signup_tutorial.dob_description",
-      ref: dobRef
+      ref: dobRef,
     },
     {
       key: "gender",
       titleKey: "signup_tutorial.gender_title",
       descriptionKey: "signup_tutorial.gender_description",
-      ref: genderRef
+      ref: genderRef,
     },
     {
       key: "signup",
-      titleKey: "signup_tutorial.signup_title", 
+      titleKey: "signup_tutorial.signup_title",
       descriptionKey: "signup_tutorial.signup_description",
-      ref: signupRef
+      ref: signupRef,
     },
     {
       key: "login",
       titleKey: "signup_tutorial.login_title",
       descriptionKey: "signup_tutorial.login_description",
-      ref: loginRef
-    }
+      ref: loginRef,
+    },
   ];
 
   useEffect(() => {
@@ -133,6 +142,10 @@ export default function SignupTutorial() {
     restartTutorial();
   }, []);
 
+  useEffect(()=>{
+    currentStepRef.current = currentStep;
+  },[currentStep])
+
   // Scroll to component when step changes
   useEffect(() => {
     if (tutorialActive && componentPositions[tutorialSteps[currentStep]?.key]) {
@@ -143,7 +156,7 @@ export default function SignupTutorial() {
   const scrollToComponent = () => {
     const currentStepData = tutorialSteps[currentStep];
     const position = componentPositions[currentStepData?.key];
-    
+
     if (!position || !scrollViewRef.current) return;
 
     // Calculate scroll position to center the component
@@ -151,13 +164,14 @@ export default function SignupTutorial() {
     const topSectionHeight = 350;
     const tooltipHeight = 250; // Approximate tooltip height
     const extraPadding = 100;
-    
+
     // Calculate target scroll position
-    let scrollY = position.top - topSectionHeight - tooltipHeight - extraPadding;
-    
+    let scrollY =
+      position.top - topSectionHeight - tooltipHeight - extraPadding;
+
     // Ensure we don't scroll to negative values
     scrollY = Math.max(0, scrollY);
-    
+
     // Smooth scroll to the component
     scrollViewRef.current.scrollTo({
       y: scrollY,
@@ -171,15 +185,15 @@ export default function SignupTutorial() {
         const handle = findNodeHandle(step.ref.current);
         if (handle) {
           UIManager.measure(handle, (x, y, width, height, pageX, pageY) => {
-            setComponentPositions(prev => ({
+            setComponentPositions((prev) => ({
               ...prev,
-              [step.key]: { 
-                top: pageY, 
-                left: pageX, 
-                width, 
+              [step.key]: {
+                top: pageY,
+                left: pageX,
+                width,
                 height,
-                centerX: pageX + width / 2
-              }
+                centerX: pageX + width / 2,
+              },
             }));
           });
         }
@@ -211,33 +225,39 @@ export default function SignupTutorial() {
   };
 
   const getComponentStyle = (stepKey) => {
-    if (!tutorialActive || currentStep !== tutorialSteps.findIndex(step => step.key === stepKey)) {
+    if (
+      !tutorialActive ||
+      currentStep !== tutorialSteps.findIndex((step) => step.key === stepKey)
+    ) {
       return styles.normalComponent;
     }
-    
+
     return styles.highlightedComponent;
   };
 
   const getTransform = (stepKey) => {
-    if (!tutorialActive || currentStep !== tutorialSteps.findIndex(step => step.key === stepKey)) {
+    if (
+      !tutorialActive ||
+      currentStep !== tutorialSteps.findIndex((step) => step.key === stepKey)
+    ) {
       return {};
     }
-    
+
     return {
-      transform: [{ scale: highlightAnim }]
+      transform: [{ scale: highlightAnim }],
     };
   };
 
   const getTooltipPosition = () => {
     const currentStepData = tutorialSteps[currentStep];
     const position = componentPositions[currentStepData?.key];
-    
+
     if (!position) return styles.tooltipBottom;
-    
+
     // Check if there's enough space above the component
     const spaceAbove = position.top - 150;
     const spaceBelow = SCREEN_HEIGHT - (position.top + position.height) - 150;
-    
+
     // Prefer positioning above if there's enough space, otherwise below
     if (spaceAbove > 100) {
       return {
@@ -255,11 +275,11 @@ export default function SignupTutorial() {
   const getTooltipArrowPosition = () => {
     const currentStepData = tutorialSteps[currentStep];
     const position = componentPositions[currentStepData?.key];
-    
+
     if (!position) return {};
-    
+
     const spaceAbove = position.top - 150;
-    
+
     if (spaceAbove > 100) {
       return {
         ...styles.tooltipArrowBottom,
@@ -273,65 +293,88 @@ export default function SignupTutorial() {
     }
   };
 
+  const speakInstruction = async(step:number)=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(tutorialSteps[step].descriptionKey), {
+      language: langMap[languageRef.current][0],
+      rate: 0.9
+    });
+  }
+
+  useEffect(()=>{
+        currentStepRef.current = currentStep;
+        Speak.stop();
+        speakInstruction(currentStep);
+    },[currentStep]);
+
   return (
-    <View style={[
-      styles.container, 
-      tutorialActive && styles.tutorialBackground
-    ]}>
-      <ScrollView 
+    <View
+      style={[styles.container, tutorialActive && styles.tutorialBackground]}
+    >
+      <View style={[styles.buttonSection,{
+              position: "absolute",
+              top: 40,
+              zIndex: 500,
+            }]}>
+            <TouchableOpacity onPress={() => router.replace("/(auth)/Signup")}>
+              <Ionicons
+                name="arrow-back-circle-outline"
+                size={70}
+                color="#fff"
+              />
+            </TouchableOpacity>
+            {isFocused && <VoiceAgent
+              tutorialName="SignupTutorial"
+              uiHandlerFunction={(num: string) => {
+                const step = parseInt(num);
+                if (!isNaN(step)) {
+                  setCurrentStep(step);
+                }
+              }}
+              size={35}
+              currentStepRef={currentStepRef}
+              onStateChange={(state:AgentState) => {if(state === "idle") setAiOn(false); else setAiOn(true)}}
+            />}
+          </View>
+      <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         scrollEnabled={!tutorialActive}
       >
         {/* Top Blue Section */}
-        <View style={[
-          styles.topSection, 
-          tutorialActive && styles.dimmedSection
-        ]}>
-          <View style={styles.buttonSection}>
-            <TouchableOpacity onPress={restartTutorial}>
-              <FontAwesome name="repeat" size={40} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.replace("/(auth)/Signup")}>
-              <Ionicons
-                name="arrow-back-circle-outline"
-                size={50}
-                color="#fff"
-              />
-            </TouchableOpacity>
-          </View>
+        <View
+          style={[styles.topSection, tutorialActive && styles.dimmedSection]}
+        >
 
-          <Image source={require("../../assets/logo.png")} style={styles.logo} />
+          <Image
+            source={require("../../assets/logo.png")}
+            style={styles.logo}
+          />
           <Text style={styles.logoText}>Tutex</Text>
         </View>
 
         {/* Bottom White Section */}
-        <View style={[
-          styles.bottomSection, 
-          tutorialActive && styles.dimmedSection
-        ]}>
-          
-          
-          <Text style={[
-            styles.title,
-            tutorialActive && styles.dimmedText
-          ]}>
+        <View
+          style={[styles.bottomSection, tutorialActive && styles.dimmedSection]}
+        >
+          <Text style={[styles.title, tutorialActive && styles.dimmedText]}>
             Sign Up
           </Text>
 
           {/* Name */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.inputWrapper,
               getComponentStyle("name"),
-              getTransform("name")
-            ]} 
+              getTransform("name"),
+            ]}
             ref={nameRef}
           >
-            <Text style={[
-              styles.label,
-              tutorialActive && styles.dimmedText
-            ]}>
+            <Text style={[styles.label, tutorialActive && styles.dimmedText]}>
               Name
             </Text>
             <View style={styles.inputContainer}>
@@ -348,18 +391,15 @@ export default function SignupTutorial() {
           </Animated.View>
 
           {/* Email */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.inputWrapper,
               getComponentStyle("email"),
-              getTransform("email")
-            ]} 
+              getTransform("email"),
+            ]}
             ref={emailRef}
           >
-            <Text style={[
-              styles.label,
-              tutorialActive && styles.dimmedText
-            ]}>
+            <Text style={[styles.label, tutorialActive && styles.dimmedText]}>
               Email
             </Text>
             <View style={styles.inputContainer}>
@@ -377,18 +417,15 @@ export default function SignupTutorial() {
           </Animated.View>
 
           {/* Password */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.inputWrapper,
               getComponentStyle("password"),
-              getTransform("password")
-            ]} 
+              getTransform("password"),
+            ]}
             ref={passwordRef}
           >
-            <Text style={[
-              styles.label,
-              tutorialActive && styles.dimmedText
-            ]}>
+            <Text style={[styles.label, tutorialActive && styles.dimmedText]}>
               Password
             </Text>
             <View style={styles.inputContainer}>
@@ -402,7 +439,10 @@ export default function SignupTutorial() {
                 onChangeText={(val) => setForm({ ...form, password: val })}
                 editable={!tutorialActive}
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={tutorialActive}>
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                disabled={tutorialActive}
+              >
                 <Ionicons
                   name={showPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
@@ -413,18 +453,15 @@ export default function SignupTutorial() {
           </Animated.View>
 
           {/* Date of Birth */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.inputWrapper,
               getComponentStyle("dob"),
-              getTransform("dob")
-            ]} 
+              getTransform("dob"),
+            ]}
             ref={dobRef}
           >
-            <Text style={[
-              styles.label,
-              tutorialActive && styles.dimmedText
-            ]}>
+            <Text style={[styles.label, tutorialActive && styles.dimmedText]}>
               Date of Birth
             </Text>
             <TouchableOpacity
@@ -452,18 +489,15 @@ export default function SignupTutorial() {
           </Animated.View>
 
           {/* Gender */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.inputWrapper,
               getComponentStyle("gender"),
-              getTransform("gender")
-            ]} 
+              getTransform("gender"),
+            ]}
             ref={genderRef}
           >
-            <Text style={[
-              styles.label,
-              tutorialActive && styles.dimmedText
-            ]}>
+            <Text style={[styles.label, tutorialActive && styles.dimmedText]}>
               Gender
             </Text>
             <View style={[styles.inputContainer, { paddingRight: 10 }]}>
@@ -483,37 +517,39 @@ export default function SignupTutorial() {
 
           {/* Sign Up Button */}
           <Animated.View
-            style={[
-              getComponentStyle("signup"),
-              getTransform("signup")
-            ]}
+            style={[getComponentStyle("signup"), getTransform("signup")]}
             ref={signupRef}
           >
-            <TouchableOpacity onPress={() => {}} style={styles.signupBtn} disabled={tutorialActive}>
+            <TouchableOpacity
+              onPress={() => {}}
+              style={styles.signupBtn}
+              disabled={tutorialActive}
+            >
               <Text style={styles.signupText}>Sign Up</Text>
             </TouchableOpacity>
           </Animated.View>
 
           {/* Login Link */}
-          <Animated.View 
+          <Animated.View
             style={[
               styles.loginWrapper,
               getComponentStyle("login"),
-              getTransform("login")
-            ]} 
+              getTransform("login"),
+            ]}
             ref={loginRef}
           >
             <View style={styles.loginButton}>
-              <Text style={[
-                styles.normalText,
-                tutorialActive && styles.dimmedText
-              ]}>
+              <Text
+                style={[styles.normalText, tutorialActive && styles.dimmedText]}
+              >
                 Already have an account?{" "}
               </Text>
-              <Text style={[
-                styles.loginLinkText,
-                tutorialActive && styles.dimmedText
-              ]}>
+              <Text
+                style={[
+                  styles.loginLinkText,
+                  tutorialActive && styles.dimmedText,
+                ]}
+              >
                 Login
               </Text>
             </View>
@@ -526,7 +562,7 @@ export default function SignupTutorial() {
         <View style={[styles.tooltipContainer, getTooltipPosition()]}>
           {/* Tooltip Arrow */}
           <View style={[styles.tooltipArrow, getTooltipArrowPosition()]} />
-          
+
           <View style={styles.tooltip}>
             <Text style={styles.tooltipTitle}>
               {t(tutorialSteps[currentStep].titleKey)}
@@ -534,28 +570,32 @@ export default function SignupTutorial() {
             <Text style={styles.tooltipDescription}>
               {t(tutorialSteps[currentStep].descriptionKey)}
             </Text>
-            
-            <View style={styles.tooltipButtons}>
+
+            {!aiOn && <View style={styles.tooltipButtons}>
               {currentStep > 0 && (
                 <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                  <Text style={styles.backBtnText}>{t('signup_tutorial.btn_back')}</Text>
+                  <Text style={styles.backBtnText}>
+                    {t("signup_tutorial.btn_back")}
+                  </Text>
                 </TouchableOpacity>
               )}
-              
+
               <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
                 <Text style={styles.nextBtnText}>
-                  {currentStep === tutorialSteps.length - 1 ?  t('login_tutorial.btn_finish') : t('login_tutorial.btn_next')}
+                  {currentStep === tutorialSteps.length - 1
+                    ? t("login_tutorial.btn_finish")
+                    : t("login_tutorial.btn_next")}
                 </Text>
               </TouchableOpacity>
-            </View>
-            
+            </View>}
+
             <View style={styles.stepIndicator}>
               {tutorialSteps.map((_, index) => (
-                <View 
+                <View
                   key={index}
                   style={[
                     styles.stepDot,
-                    index === currentStep && styles.activeStepDot
+                    index === currentStep && styles.activeStepDot,
                   ]}
                 />
               ))}
@@ -568,8 +608,8 @@ export default function SignupTutorial() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
+  container: {
+    flex: 1,
     backgroundColor: "#0d6efd",
   },
   scrollContent: {
@@ -590,9 +630,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  logo: { 
-    width: 100, 
-    height: 100, 
+  logo: {
+    width: 100,
+    height: 100,
   },
   logoText: {
     color: "white",
@@ -659,10 +699,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   normalComponent: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   highlightedComponent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -688,13 +728,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   normalText: {
-    color: "black", 
-    fontSize: 18 
+    color: "black",
+    fontSize: 18,
   },
-  loginLinkText: { 
-    color: "#0d6efd", 
-    fontSize: 18, 
-    marginLeft: 6 
+  loginLinkText: {
+    color: "#0d6efd",
+    fontSize: 18,
+    marginLeft: 6,
   },
   cloudContainer: {
     flex: 1,
@@ -798,7 +838,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 8,
-    marginLeft: "auto"
+    marginLeft: "auto",
   },
   nextBtnText: {
     color: "white",
