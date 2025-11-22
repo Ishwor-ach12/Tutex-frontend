@@ -1,17 +1,26 @@
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronDownIcon, ChevronUpIcon, CircleCheck, Delete, Dot, Minus } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CircleCheck,
+  Delete,
+  Dot,
+  Minus,
+} from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
 // FIX: Using core React Native components
 import {
-    Alert,
-    Dimensions,
-    Image,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface PaymentData {
@@ -150,23 +159,34 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress }) => {
 
 // --- Main Screen Component ---
 export default function PaymentPinScreen() {
-    const router = useRouter();
+  const router = useRouter();
   const { data } = useLocalSearchParams();
   const parsed = data ? JSON.parse(data as string) : {};
-  const refId = "ABC123a1b2abc123a1234a500c4SJ78Bajbae30e01bcfdxa"
-  const refUrl = "https://phonepe.com"
-  const amount = parsed.amount
-  const recipientName = parsed.recipientName
+  const refId = "ABC123a1b2abc123a1234a500c4SJ78Bajbae30e01bcfdxa";
+  const refUrl = "https://phonepe.com";
+  const amount = parsed.amount;
+  const recipientName = parsed.recipientName;
 
   // State definitions
   const [pin, setPin] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [pinError, setPinError] = useState<boolean>(false);
-  const [currentStep, setCurrentStep] = useState<number>(3)
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (pin === "0000"){
+      setCurrentStep(1);
+      console.log("hi");
+    } 
+    else setCurrentStep(0);
+  }, [pin]);
 
   useEffect(()=>{
-    if(pin == "0000") setCurrentStep(4)
-  }, [pin])
+      currentStepRef.current = currentStep;
+    },[currentStep]);
+  
 
   const handleKeyPress = (key: string): void => {
     setPinError(false);
@@ -177,10 +197,9 @@ export default function PaymentPinScreen() {
       if (pin.length === PIN_LENGTH) {
         if (pin === CORRECT_PIN) {
           router.push({
-            pathname : "./paymentSuccess",
-            params :{ amount, refId, recipientName}
-          }
-          );
+            pathname: "./paymentSuccess",
+            params: { amount, refId, recipientName },
+          });
         } else {
           setPinError(true);
           setPin("");
@@ -200,7 +219,7 @@ export default function PaymentPinScreen() {
   const renderPinInput = () => {
     const pinArray = Array.from({ length: PIN_LENGTH }, (_, i: number) => {
       const isEntered: boolean = i < pin.length;
-      const content = isEntered ? (<Dot size={56}/>) : (<Minus size={56}/>); // Dot for entered, dash for empty
+      const content = isEntered ? <Dot size={56} /> : <Minus size={56} />; // Dot for entered, dash for empty
 
       return (
         <Text
@@ -228,19 +247,27 @@ export default function PaymentPinScreen() {
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableOpacity style={styles.modalOverlay} onPress={()=>setModalVisible(false)}>
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        onPress={() => setModalVisible(false)}
+      >
         <View style={styles.modalContent}>
           {/* Header bar mimicking the top of the second image */}
           <View style={styles.modalHeader}>
             <View style={styles.bankAndUpiContainer}>
               <View>
-                <Text style={styles.modalBankName}>{parsed.senderBankName}</Text>
+                <Text style={styles.modalBankName}>
+                  {parsed.senderBankName}
+                </Text>
                 <Text style={styles.modalAccountNum}>
                   XXXX{parsed.senderAccountLast4}
                 </Text>
               </View>
               {/* UPI Logo Placeholder */}
-              <Image source={require("@/assets/images/phonepeTutorial/upi_logo.png")} style={styles.upiLogoPlaceholder}/>
+              <Image
+                source={require("@/assets/images/phonepeTutorial/upi_logo.png")}
+                style={styles.upiLogoPlaceholder}
+              />
             </View>
             <View style={styles.modalSeparator} />
 
@@ -251,7 +278,9 @@ export default function PaymentPinScreen() {
                 <Text style={styles.modalLabel}>Sending:</Text>
               </View>
               <View style={{ alignItems: "flex-end" }}>
-                <Text style={styles.modalRecipientText}>{parsed.recipientName}</Text>
+                <Text style={styles.modalRecipientText}>
+                  {parsed.recipientName}
+                </Text>
                 <View style={styles.modalAmountContainer}>
                   <Text style={styles.modalAmountText}>₹ {parsed.amount}</Text>
                   {/* Collapse button (inside modal) uses ChevronUpIcon placeholder */}
@@ -271,7 +300,9 @@ export default function PaymentPinScreen() {
           <View style={styles.modalBody}>
             <View style={styles.modalDetailRow}>
               <Text style={styles.modalDetailLabel}>PAYING TO</Text>
-              <Text style={styles.modalDetailValue}>{parsed.recipientName}</Text>
+              <Text style={styles.modalDetailValue}>
+                {parsed.recipientName}
+              </Text>
             </View>
             <View style={styles.modalDetailRow}>
               <Text style={styles.modalDetailLabel}>AMOUNT</Text>
@@ -300,16 +331,38 @@ export default function PaymentPinScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {isFocused && (
+          <View
+            style={{
+              position: "absolute",
+              top: 150,
+              right: 20,
+              zIndex: 500,
+            }}
+          >
+            <VoiceAgent
+              tutorialName="UPI_MB_P4"
+              size={35}
+              uiHandlerFunction={(num: string) => {}}
+              introduce={false}
+              currentStepRef={currentStepRef}
+            />
+          </View>
+        )}
         {/* --- Header Section (Top bar) --- */}
         <View style={styles.header}>
           <View style={styles.bankAndUpiContainer}>
             <View>
               <Text style={styles.bankName}>{parsed.senderBankName}</Text>
-              <Text style={styles.accountNum}>XXXX{parsed.senderAccountLast4}</Text>
+              <Text style={styles.accountNum}>
+                XXXX{parsed.senderAccountLast4}
+              </Text>
             </View>
             {/* UPI Logo Placeholder */}
-                          <Image source={require("@/assets/images/phonepeTutorial/upi_logo.png")} style={styles.upiLogoPlaceholder}/>
-
+            <Image
+              source={require("@/assets/images/phonepeTutorial/upi_logo.png")}
+              style={styles.upiLogoPlaceholder}
+            />
           </View>
           <View style={styles.separator} />
 
@@ -349,14 +402,16 @@ export default function PaymentPinScreen() {
 
         {/* --- Warning Banner --- */}
         <View style={styles.warningBanner}>
-            <View style={styles.warningIcon}>
-
-          <Text style={{color: "#fff", fontSize: 18, fontWeight: "bold"}}>!</Text>
-            </View>
+          <View style={styles.warningIcon}>
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+              !
+            </Text>
+          </View>
           <Text style={styles.warningText}>
             You are transferring money from your{" "}
-            <Text style={{ fontWeight: "bold" }}>{parsed.senderBankName}</Text> account
-            to <Text style={{ fontWeight: "bold" }}>{parsed.recipientName}</Text>
+            <Text style={{ fontWeight: "bold" }}>{parsed.senderBankName}</Text>{" "}
+            account to{" "}
+            <Text style={{ fontWeight: "bold" }}>{parsed.recipientName}</Text>
           </Text>
         </View>
 
@@ -410,7 +465,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     justifyContent: "center",
     alignItems: "center",
-    objectFit: "contain"
+    objectFit: "contain",
   },
   separator: {
     height: 1,
@@ -490,9 +545,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
     width: 28,
     height: 28,
-    backgroundColor:"#d4740eff",
+    backgroundColor: "#d4740eff",
     borderRadius: "100%",
-    alignItems: "center"
+    alignItems: "center",
   },
   warningText: {
     fontSize: 12,
@@ -510,7 +565,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     width: width, // Full width
     paddingBottom: 20,
-    backgroundColor: "#eef0f5ff"
+    backgroundColor: "#eef0f5ff",
   },
   keypadButton: {
     width: width / 3, // Three buttons per row
@@ -536,7 +591,7 @@ const styles = StyleSheet.create({
   },
 
   // --- Modal Styles (Second Image) ---
-  modalOverlay:{
+  modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)", // Semi-transparent overlay
     justifyContent: "flex-start", // Modal content starts from top

@@ -1,7 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import * as Speak from "expo-speech";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import {
   Animated,
   Dimensions,
@@ -14,10 +18,10 @@ import {
   UIManager,
   View,
 } from "react-native";
-import { VoiceAgent } from "../customComponents/VoiceAgent";
+import { AgentState } from "../customComponents/AIAgentIcon";
+import { langMap, VoiceAgent } from "../customComponents/VoiceAgent";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
 
 export default function LoginTutorial() {
   const router = useRouter();
@@ -25,7 +29,10 @@ export default function LoginTutorial() {
   const { t } = useTranslation();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const currentStepRef = useRef(0);
+  const currentStepRef = useRef(currentStep);
+  const isFocused = useIsFocused();
+  const [aiOn, setAiOn] = useState(false);
+  const languageRef = useRef<string | null>(null);
   const [tutorialActive, setTutorialActive] = useState(true);
   const [componentPositions, setComponentPositions] = useState({});
 
@@ -92,9 +99,9 @@ export default function LoginTutorial() {
     measureComponents();
   }, [currentStep, tutorialActive]);
 
-  useEffect(()=>{
+  useEffect(() => {
     currentStepRef.current = currentStep;
-  },[currentStep])
+  }, [currentStep]);
 
   const measureComponents = () => {
     setTimeout(() => {
@@ -199,6 +206,24 @@ export default function LoginTutorial() {
     }
   };
 
+  const speakInstruction = async (step: number) => {
+    if (languageRef.current == null) {
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(tutorialSteps[step].descriptionKey), {
+      language: langMap[languageRef.current][0],
+      rate: 0.9,
+    });
+  };
+
+  useEffect(() => {
+    currentStepRef.current = currentStep;
+    Speak.stop();
+    speakInstruction(currentStep);
+  }, [currentStep]);
+
   return (
     <View
       style={[styles.container, tutorialActive && styles.tutorialBackground]}
@@ -209,7 +234,18 @@ export default function LoginTutorial() {
           <TouchableOpacity onPress={() => router.replace("/(auth)/Login")}>
             <Ionicons name="arrow-back-circle-outline" size={70} color="#fff" />
           </TouchableOpacity>
-          <VoiceAgent tutorialName="LoginTutorial" uiHandlerFunction={handleUIVoiceSync} size={35} introduce={true} currentStepRef={currentStepRef}/>
+          {isFocused && (
+            <VoiceAgent
+              tutorialName="LoginTutorial"
+              uiHandlerFunction={handleUIVoiceSync}
+              size={35}
+              currentStepRef={currentStepRef}
+              onStateChange={(state: AgentState) => {
+                if (state === "idle") setAiOn(false);
+                else setAiOn(true);
+              }}
+            />
+          )}
         </View>
 
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
@@ -318,23 +354,25 @@ export default function LoginTutorial() {
               {t(tutorialSteps[currentStep].descriptionKey)}
             </Text>
 
-            <View style={styles.tooltipButtons}>
-              {currentStep > 0 && (
-                <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                  <Text style={styles.backBtnText}>
-                    {t("login_tutorial.btn_back")}
+            {!aiOn && (
+              <View style={styles.tooltipButtons}>
+                {currentStep > 0 && (
+                  <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
+                    <Text style={styles.backBtnText}>
+                      {t("login_tutorial.btn_back")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
+                  <Text style={styles.nextBtnText}>
+                    {currentStep === tutorialSteps.length - 1
+                      ? t("login_tutorial.btn_finish")
+                      : t("login_tutorial.btn_next")}
                   </Text>
                 </TouchableOpacity>
-              )}
-
-              <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
-                <Text style={styles.nextBtnText}>
-                  {currentStep === tutorialSteps.length - 1
-                    ? t("login_tutorial.btn_finish")
-                    : t("login_tutorial.btn_next")}
-                </Text>
-              </TouchableOpacity>
-            </View>
+              </View>
+            )}
 
             <View style={styles.stepIndicator}>
               {tutorialSteps.map((_, index) => (

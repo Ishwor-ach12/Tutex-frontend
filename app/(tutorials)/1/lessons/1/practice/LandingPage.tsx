@@ -4,30 +4,32 @@
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 // Lucide React Native icons
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import {
-    BadgePercent,
-    Bell,
-    Building2,
-    Car,
-    Clock,
-    HelpCircle,
-    Home,
-    Lightbulb,
-    Megaphone,
-    Phone,
-    QrCode,
-    Search,
-    Smartphone,
-    Wallet,
+  BadgePercent,
+  Bell,
+  Building2,
+  Car,
+  Clock,
+  HelpCircle,
+  Home,
+  Lightbulb,
+  Megaphone,
+  Phone,
+  QrCode,
+  Search,
+  Smartphone,
+  Wallet,
 } from "lucide-react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -37,6 +39,10 @@ export default function PhonePeLanding() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showHeader, setShowHeader] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
+  const isFocused = useIsFocused();
+  
+  
 
   // Animated values for header fade-in
   const headerOpacity = scrollY.interpolate({
@@ -65,6 +71,23 @@ export default function PhonePeLanding() {
 
   return (
     <View style={styles.container}>
+
+    {isFocused && <View
+            style={{
+              position: "absolute",
+              top: 40,
+              right: 20,
+              zIndex: 500,
+            }}
+          >
+            <VoiceAgent
+              tutorialName="UPI_MB_P1"
+              size={35}
+              uiHandlerFunction={(num: string) => {}}
+              introduce={true}
+              currentStepRef={currentStepRef}
+            />
+          </View>}
       <View style={styles.topBar} />
 
       <Animated.View style={styles.scrollHeader}>

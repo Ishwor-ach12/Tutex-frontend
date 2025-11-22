@@ -1,11 +1,13 @@
 // QR Scanner Page - React Native with Expo
 // File: app/qr.tsx
 
+import { VoiceAgent } from '@/app/customComponents/VoiceAgent';
+import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, Flashlight, HelpCircle, Image as ImageIcon } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -16,7 +18,9 @@ export default function QRScanner() {
   const [torch, setTorch] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(true);
-  const [currentStep, setCurrentStep] = useState<number>(2)
+  const [currentStep, setCurrentStep] = useState<number>(2);
+  const currentStepRef = useRef<number>(currentStep);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     // Request camera permission on mount
@@ -105,6 +109,23 @@ export default function QRScanner() {
   return (
     <View style={styles.container}>
       {/* Camera View - only render when active */}
+
+      {isFocused && <View
+                  style={{
+                    position: "absolute",
+                    top: 40,
+                    right: 20,
+                    zIndex: 500,
+                  }}
+                >
+                  <VoiceAgent
+                    tutorialName="UPI_MB_P2"
+                    size={35}
+                    uiHandlerFunction={(num: string) => {}}
+                    introduce={false}
+                    currentStepRef={currentStepRef}
+                  />
+                </View>}
       {isCameraActive && (
         <CameraView
           style={styles.camera}

@@ -1,6 +1,8 @@
 // Enter Amount Page - React Native with Expo Router
 // File: app/enterAmount.tsx
 
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
@@ -10,7 +12,7 @@ import {
   HelpCircle,
   X,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -32,19 +34,20 @@ export default function EnterAmount() {
   const [showModal, setShowModal] = useState(false);
   const recipientName = "Recipient Name";
   const senderBankName = "Bank Name";
-  const senderAccountLast4 = "1234"
-  const [currentStep, setCurrentStep] = useState<number>(1)
+  const senderAccountLast4 = "1234";
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
+  const isFocused = useIsFocused();
 
   const handleProceedToPay = () => {
-    if (amount && parseFloat(amount) > 0) {
-      setShowModal(true);
-      setCurrentStep(4)
-    }
+    setShowModal(true);
+    setCurrentStep(2);
   };
 
-  useEffect(()=>{
-    if(amount == "120") setCurrentStep(2)
-  }, [amount])
+  useEffect(() => {
+    if (amount === "120") setCurrentStep(1);
+    else setCurrentStep(0);
+  }, [amount]);
 
   const handlePay = () => {
     // Handle final payment
@@ -54,13 +57,41 @@ export default function EnterAmount() {
     router.push({
       pathname: "./enterPin",
       params: {
-        data: JSON.stringify({ amount, recipientName, senderBankName, senderAccountLast4 }),
+        data: JSON.stringify({
+          amount,
+          recipientName,
+          senderBankName,
+          senderAccountLast4,
+        }),
       },
     });
   };
 
+  useEffect(()=>{
+    currentStepRef.current = currentStep;
+  },[currentStep]);
+
+
   return (
     <View style={styles.container}>
+      {!showModal && isFocused && (
+        <View
+          style={{
+            position: "absolute",
+            top: 40,
+            right: 20,
+            zIndex: 500,
+          }}
+        >
+          <VoiceAgent
+            tutorialName="UPI_MB_P3"
+            size={35}
+            uiHandlerFunction={(num: string) => {}}
+            introduce={false}
+            currentStepRef={currentStepRef}
+          />
+        </View>
+      )}
       {showModal && (
         <View
           style={{
@@ -145,11 +176,11 @@ export default function EnterAmount() {
         <TouchableOpacity
           style={[
             styles.proceedButton,
-            (!amount || parseFloat(amount) <= 0) &&
+            (currentStep === 0) &&
               styles.proceedButtonDisabled,
           ]}
           onPress={handleProceedToPay}
-          disabled={!amount || parseFloat(amount) <= 0}
+          disabled={currentStep === 0}
         >
           <Text style={styles.proceedButtonText}>Proceed To Pay</Text>
         </TouchableOpacity>
@@ -160,8 +191,26 @@ export default function EnterAmount() {
         visible={showModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowModal(false)}
+        onRequestClose={() => {setShowModal(false);setCurrentStep(1);}}
       >
+        {isFocused && (
+        <View
+          style={{
+            position: "absolute",
+            top: 40,
+            right: 20,
+            zIndex: 500,
+          }}
+        >
+          <VoiceAgent
+            tutorialName="UPI_MB_P3"
+            size={35}
+            uiHandlerFunction={(num: string) => {}}
+            introduce={false}
+            currentStepRef={currentStepRef}
+          />
+        </View>
+      )}
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {/* Modal Header */}

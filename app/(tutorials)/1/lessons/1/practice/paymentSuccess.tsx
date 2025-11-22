@@ -1,15 +1,17 @@
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckIcon, LayoutGridIcon, Share2Icon } from "lucide-react-native";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // --- INTERFACES & TYPES ---
@@ -37,6 +39,9 @@ export default function PaymentSuccessScreen() {
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const { amount, recipientName, refId } = useLocalSearchParams();
   const router = useRouter();
+
+  const currentStepRef = useRef<number>(0);
+  const isFocused = useIsFocused();
 
   // Get current date and time
   const formattedDateTime: string = useMemo(() => {
@@ -101,10 +106,15 @@ export default function PaymentSuccessScreen() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      const selectedLesson = data.body.lessons.filter(lesson => lesson.lessonId == lessonId)[0]
-      console.log(selectedLesson)
-      
-      await AsyncStorage.setItem("selectedLesson", JSON.stringify(selectedLesson));
+      const selectedLesson = data.body.lessons.filter(
+        (lesson) => lesson.lessonId == lessonId
+      )[0];
+      console.log(selectedLesson);
+
+      await AsyncStorage.setItem(
+        "selectedLesson",
+        JSON.stringify(selectedLesson)
+      );
 
       router.push({
         pathname: `/(main)/(main-routes)/LessonDetailPage`,
@@ -139,6 +149,23 @@ export default function PaymentSuccessScreen() {
     <View style={styles.safeArea}>
       <View style={styles.container}>
         {/* Green Header Section */}
+        {isFocused && (
+          <View
+            style={{
+              position: "absolute",
+              top: 40,
+              right: 20,
+              zIndex: 500,
+            }}
+          >
+            <VoiceAgent
+              tutorialName="UPI_MB_5"
+              size={35}
+              uiHandlerFunction={(num: string) => {}}
+              currentStepRef={currentStepRef}
+            />
+          </View>
+        )}
         <View style={styles.successHeader}>
           <View style={styles.checkmarkContainer}>
             <CheckIcon size={50} color="#4CAF50" />
