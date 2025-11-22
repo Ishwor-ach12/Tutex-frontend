@@ -80,7 +80,7 @@ const LessonDetailPage = () => {
     const loadLesson = {courseId, assignmentId, lessonId, moduleName};
     await AsyncStorage.setItem("loadedLesson", JSON.stringify(loadLesson))
     router.push(
-      `/(tutorials)/${courseId}/lessons/${lessonId}/${moduleName}/LandingPage` as any
+      `/(tutorials)/${courseId}/lessons/${lessonId}/${moduleName}/startPage` as any
     );
   };
 
