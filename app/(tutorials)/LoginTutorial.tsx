@@ -25,6 +25,7 @@ export default function LoginTutorial() {
   const { t } = useTranslation();
 
   const [currentStep, setCurrentStep] = useState(0);
+  const currentStepRef = useRef(0);
   const [tutorialActive, setTutorialActive] = useState(true);
   const [componentPositions, setComponentPositions] = useState({});
 
@@ -90,6 +91,10 @@ export default function LoginTutorial() {
   useEffect(() => {
     measureComponents();
   }, [currentStep, tutorialActive]);
+
+  useEffect(()=>{
+    currentStepRef.current = currentStep;
+  },[currentStep])
 
   const measureComponents = () => {
     setTimeout(() => {
@@ -204,7 +209,7 @@ export default function LoginTutorial() {
           <TouchableOpacity onPress={() => router.replace("/(auth)/Login")}>
             <Ionicons name="arrow-back-circle-outline" size={70} color="#fff" />
           </TouchableOpacity>
-          <VoiceAgent tutorialName="LoginTutorial" uiHandlerFunction={handleUIVoiceSync} size={35}/>
+          <VoiceAgent tutorialName="LoginTutorial" uiHandlerFunction={handleUIVoiceSync} size={35} introduce={true} currentStepRef={currentStepRef}/>
         </View>
 
         <Image source={require("../../assets/logo.png")} style={styles.logo} />

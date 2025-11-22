@@ -1,6 +1,8 @@
 // Enter Amount Page - React Native with Expo Router
 // File: app/enterAmount.tsx
 
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
@@ -84,6 +86,8 @@ export default function EnterAmount() {
   const senderBankName = "Bank Name";
   const senderAccountLast4 = "1234";
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
+  const isFocused = useIsFocused();
   const amountRef = useRef<TextInput>(null);
 
   const handleProceedToPay = () => {
@@ -134,8 +138,34 @@ export default function EnterAmount() {
     }
   };
 
+  useEffect(()=>{
+      currentStepRef.current = currentStep;
+  },[currentStep]);
+
   return (
     <View style={styles.container}>
+      {isFocused && <View
+          style={{
+            position: "absolute",
+            top: 50,
+            right: 20,
+            zIndex: 500,
+          }}
+        >
+          <VoiceAgent
+            tutorialName="UPI_MB_3"
+            size={35}
+            uiHandlerFunction={(num: string) => {
+              const step = parseInt(num);
+              if (!isNaN(step)) {
+  
+                setCurrentStep(Math.min(currentStep,step));
+              }
+            }}
+            introduce={false}
+            currentStepRef={currentStepRef}
+          />
+        </View>}
       {currentStep < 3 && (
         <View
           style={{

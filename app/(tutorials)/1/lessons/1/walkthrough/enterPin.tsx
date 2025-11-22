@@ -1,3 +1,5 @@
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ChevronDownIcon,
@@ -7,8 +9,8 @@ import {
   Dot,
   Minus,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import {useTranslation } from "react-i18next";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 // FIX: Using core React Native components
 import {
   Alert,
@@ -235,13 +237,14 @@ export default function PaymentPinScreen() {
   const refUrl = "https://phonepe.com";
   const amount = parsed.amount;
   const recipientName = parsed.recipientName;
+  const isFocused = useIsFocused();
 
   // State definitions
   const [pin, setPin] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [pinError, setPinError] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
-
+  const currentStepRef = useRef<number>(currentStep);
   const handleKeyPress = (key: string): void => {
     setPinError(false);
 
@@ -284,6 +287,10 @@ export default function PaymentPinScreen() {
     if (pin == CORRECT_PIN) setCurrentStep(currentStep + 1);
   }, [pin]);
 
+  useEffect(()=>{
+      currentStepRef.current = currentStep;
+    },[currentStep]);
+  
   // Render the PIN input display (dashes/dots)
   const renderPinInput = () => {
     const pinArray = Array.from({ length: PIN_LENGTH }, (_, i: number) => {
@@ -399,6 +406,28 @@ export default function PaymentPinScreen() {
 
   return (
     <View style={styles.container}>
+      {isFocused && <View
+            style={{
+              position: "absolute",
+              top: 20,
+              right: 20,
+              zIndex: 500,
+            }}
+          >
+            <VoiceAgent
+              tutorialName="UPI_MB_4"
+              size={35}
+              uiHandlerFunction={(num: string) => {
+                const step = parseInt(num);
+                if (!isNaN(step)) {
+    
+                  setCurrentStep(Math.min(currentStep,step));
+                }
+              }}
+              introduce={false}
+              currentStepRef={currentStepRef}
+            />
+          </View>}
       <View
         style={[
           {

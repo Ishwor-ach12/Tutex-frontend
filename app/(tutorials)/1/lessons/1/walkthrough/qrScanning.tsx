@@ -1,6 +1,8 @@
 // QR Scanner Page - React Native with Expo
 // File: app/qr.tsx
 
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -11,7 +13,7 @@ import {
   HelpCircle,
   Image as ImageIcon,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { default as React, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -62,7 +64,9 @@ export default function QRScanner() {
   const [scanned, setScanned] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
   const uploadQRRef = React.useRef(null);
+  const isFocused = useIsFocused();
   const [highlightBox, setHighlightBox] = useState({
     x: 0,
     y: 0,
@@ -87,11 +91,9 @@ export default function QRScanner() {
           });
         }
       }, 200);
-    }
-    else {
+    } else {
       setHighlightBox((prev) => ({ ...prev, visible: false }));
     }
-
   }, [currentStep]);
 
   useEffect(() => {
@@ -100,6 +102,10 @@ export default function QRScanner() {
       requestPermission();
     }
   }, []);
+
+  useEffect(()=>{
+    currentStepRef.current = currentStep;
+  },[currentStep])
 
   // Handle camera lifecycle - activate/deactivate when screen is focused/unfocused
   useFocusEffect(
@@ -137,17 +143,17 @@ export default function QRScanner() {
   // Handle next step
 
   const handleNextStep = () => {
-    if (currentStep < WALKTHROUGH_STEPS.length-1) {
+    if (currentStep < WALKTHROUGH_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     }
-    if(currentStep == WALKTHROUGH_STEPS.length-1){
-          setScanned(true);
+    if (currentStep == WALKTHROUGH_STEPS.length - 1) {
+      setScanned(true);
 
-    // Deactivate camera before navigation
-    setIsCameraActive(false);
+      // Deactivate camera before navigation
+      setIsCameraActive(false);
 
-    // Navigate to enter amount page
-    router.push("./enterAmount");
+      // Navigate to enter amount page
+      router.push("./enterAmount");
     }
   };
   const handlePreviousStep = () => {
@@ -216,16 +222,42 @@ export default function QRScanner() {
     );
   }
 
+
   return (
     <View style={styles.container}>
-      <View
-        style={[{
+      {isFocused && <View
+        style={{
           position: "absolute",
-          width: width,
-          height: height + 100,
-          backgroundColor: "#0000008f",
-          zIndex: 10,
-        }, currentStep > 1 && {backgroundColor:"#00000007"}]}
+          top: 50,
+          right: 20,
+          zIndex: 500,
+        }}
+      >
+        <VoiceAgent
+          tutorialName="UPI_MB_2"
+          size={35}
+          uiHandlerFunction={(num: string) => {
+            const step = parseInt(num);
+            if (!isNaN(step)) {
+
+              setCurrentStep(Math.min(currentStep,step));
+            }
+          }}
+          introduce={false}
+          currentStepRef={currentStepRef}
+        />
+      </View>}
+      <View
+        style={[
+          {
+            position: "absolute",
+            width: width,
+            height: height + 100,
+            backgroundColor: "#0000008f",
+            zIndex: 10,
+          },
+          currentStep > 1 && { backgroundColor: "#00000007" },
+        ]}
       />
       <View
         style={{

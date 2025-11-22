@@ -1,15 +1,17 @@
+import { VoiceAgent } from "@/app/customComponents/VoiceAgent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckIcon, LayoutGridIcon, Share2Icon } from "lucide-react-native";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // --- INTERFACES & TYPES ---
@@ -37,6 +39,11 @@ export default function PaymentSuccessScreen() {
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const { amount, recipientName, refId } = useLocalSearchParams();
   const router = useRouter();
+  const isFocused = useIsFocused();
+  const currentStepRef = useRef<number>(0);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+
 
   // Get current date and time
   const formattedDateTime: string = useMemo(() => {
@@ -135,10 +142,30 @@ export default function PaymentSuccessScreen() {
     // Implement sharing functionality
   };
 
+  
+
   return (
     <View style={styles.safeArea}>
       <View style={styles.container}>
         {/* Green Header Section */}
+        {isFocused && <View
+                style={{
+                  position: "absolute",
+                  top: 50,
+                  right: 20,
+                  zIndex: 500,
+                }}
+              >
+                <VoiceAgent
+                  tutorialName="UPI_MB_5"
+                  size={35}
+                  uiHandlerFunction={(num: string) => {
+                    setIsHighlighted(true);
+                  }}
+                  introduce={false}
+                  currentStepRef={currentStepRef}
+                />
+              </View>}
         <View style={styles.successHeader}>
           <View style={styles.checkmarkContainer}>
             <CheckIcon size={50} color="#4CAF50" />
@@ -200,7 +227,7 @@ export default function PaymentSuccessScreen() {
         <View style={styles.spacer} />
 
         {/* Done Button */}
-        <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
+        <TouchableOpacity style={[styles.doneButton,isHighlighted?{borderWidth: 5,borderColor: "#ffffff"}:{}]} onPress={handleDone}>
           {isButtonLoading ? (
             <ActivityIndicator size="large" color="#2196F3" />
           ) : (
