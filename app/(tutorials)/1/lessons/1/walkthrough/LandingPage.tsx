@@ -1,7 +1,9 @@
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import React, { useRef, useState } from "react";
+import * as Speak from "expo-speech";
+import React, { useEffect, useRef, useState } from "react";
+
 import {
   Animated,
   Dimensions,
@@ -12,8 +14,7 @@ import {
   View,
 } from "react-native";
 
-// Lucide React Native icons
-
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
 import {
   BadgePercent,
   Bell,
@@ -30,6 +31,9 @@ import {
   Smartphone,
   Wallet,
 } from "lucide-react-native";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -50,6 +54,10 @@ export default function PhonePeLanding() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showHeader, setShowHeader] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(0);
+  const isFocused = useIsFocused();
+  const introduce = useRef(true);
+  const languageRef = useRef<string|null>(null);
 
   // Animated values for header fade-in
   const headerOpacity = scrollY.interpolate({
@@ -76,8 +84,58 @@ export default function PhonePeLanding() {
     }
   );
 
+  useEffect(()=>{
+    if(!isFocused){;
+      introduce.current = false;
+      Speak.stop();
+    }
+  },[isFocused])
+
+  useEffect(()=>{
+    currentStepRef.current = currentStep;
+  },[currentStep]);
+
+
+  const speakInstruction = async()=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(WALKTHROUGH_STEPS[0].description), {
+      language: langMap[languageRef.current][0],
+      rate: 0.9
+    });
+  }
+
+  useEffect(()=>{
+    speakInstruction();
+  },[])
+
   return (
     <>
+      {isFocused && <View
+        style={{
+          position: "absolute",
+          top: 50,
+          right: 20,
+          zIndex: 500,
+        }}
+      >
+        <VoiceAgent
+          tutorialName="UPI_MB_1"
+          size={35}
+          uiHandlerFunction={(num: string) => {
+            const step = parseInt(num);
+            if (!isNaN(step)) {
+              setCurrentStep(step);
+            }
+          }}
+          introduce={false}
+          currentStepRef={currentStepRef}
+        />
+      </View>}
+
       <View
         style={{
           position: "absolute",

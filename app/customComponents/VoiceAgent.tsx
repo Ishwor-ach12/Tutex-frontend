@@ -26,12 +26,36 @@ type ParsedResponse = {
   text: string;
 };
 
-const langMap: { [key: string]: string[] } = {
-  en: ["en-US", "english", "I’m your helpful assistant. Ask me anything about this page!"],
-  hi: ["hi-IN", "hindi", "मैं आपकी सहायक हूँ। इस पेज के बारे में मुझसे कुछ भी पूछिए!"],
+export const langMap: { [key: string]: string[] } = {
+  en: [
+    "en-US",
+    "english",
+    "I’m your helpful assistant. Ask me anything about this page!",
+  ],
+  hi: [
+    "hi-IN",
+    "hindi",
+    "मैं आपकी सहायक हूँ। इस पेज के बारे में मुझसे कुछ भी पूछिए!",
+  ],
 };
 
-export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName:string,uiHandlerFunction:(locationRef:string)=>void,size:number}) => {
+let count = 0;
+
+export const VoiceAgent = ({
+  tutorialName,
+  uiHandlerFunction,
+  size,
+  introduce = false,
+  currentStepRef,
+  onStateChange = () => {},
+}: {
+  tutorialName: string,
+  uiHandlerFunction: (locationRef: string) => void,
+  size: number,
+  introduce?: Boolean,
+  currentStepRef:React.RefObject<number>,
+  onStateChange?: (newState: AgentState) => void,
+}) => {
   const [state, setState] = useState<AgentState>("idle");
   const stateRef = useRef<AgentState>(state);
   const [disabled, setDisabled] = useState<Boolean>(true);
@@ -41,52 +65,61 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
   const messagesRef = useRef<Message[]>([]);
   const textRef = useRef<string>("");
   const language = useRef<string>("");
-  const agentResponse = useRef<ParsedResponse>({text:"",highlight:"null"});
-  const [error,setError] = useState<Boolean>(false);
-
+  const agentResponse = useRef<ParsedResponse>({ text: "", highlight: "null" });
+  const [error, setError] = useState<Boolean>(false);
 
   //initiaize elements
   useEffect(() => {
-    aiRef.current = new GoogleGenAI({ apiKey: process.env.EXPO_PUBLIC_GEMINI_KEY });
-    (async () =>{
-      language.current = await AsyncStorage.getItem("user-language")as string
-      agentResponse.current = {text:langMap[language.current][2],highlight:"null"};
-      setState("speaking");
+    aiRef.current = new GoogleGenAI({
+      apiKey: process.env.EXPO_PUBLIC_GEMINI_KEY,
+    });
+    (async () => {
+      language.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+      if (introduce) {
+        agentResponse.current = {
+          text: langMap[language.current][2],
+          highlight: "null",
+        };
+        setState("speaking");
+      } else setDisabled(false);
     })();
+    count++;
+    console.log("entered",count);
 
     return () => {
       startAborting();
+      count--;
+      console.log("removed",count);
     };
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     disabledRef.current = disabled;
-  },[disabled])
+  }, [disabled]);
 
+  useEffect(() => {
+    if (error) setState("idle");
+  }, [error]);
 
-  useEffect(()=>{
-    if(error)setState("idle");
-  },[error]);
-
-  useEffect(()=>{
+  useEffect(() => {
     stateRef.current = state;
-    if(state == "listening"){
+    onStateChange(state);
+    if (state == "listening") {
       startListening();
-    }else if(state == "processing"){
-     startProcessing();
-    }else if(state == "speaking"){
+    } else if (state == "processing") {
+      startProcessing();
+    } else if (state == "speaking") {
       startSpeaking();
-    }else {
-      if(error){
+    } else {
+      if (error) {
         //incase user have disabled it.
         setDisabled(false);
         setError(false);
-      }else
-        startAborting();
+      } else startAborting();
     }
-  },[state]);
-
-
+  }, [state]);
 
   useSpeechRecognitionEvent("result", (event) => {
     textRef.current = event.results[0]?.transcript || "";
@@ -94,13 +127,11 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
 
   useSpeechRecognitionEvent("end", () => {
     console.log("User finished speaking");
-    if(disabledRef.current){
+    if (disabledRef.current) {
       //interrupted by user
       setDisabled(false);
-    }else
-      setState("processing");
+    } else setState("processing");
   });
-
 
   // Start listening
   const startListening = async () => {
@@ -111,15 +142,17 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
     });
   };
 
-
   //Start processing
-  const startProcessing = async ()=>{
+  const startProcessing = async () => {
     messagesRef.current.push({
       role: "user",
-      parts: [{ text: textRef.current }],
+      parts: [{ text: `user is at component:'${currentStepRef.current}' . user is saying:${textRef.current}` }],
     });
 
-    if (!aiRef.current) aiRef.current = new GoogleGenAI({apiKey:process.env.EXPO_PUBLIC_GEMINI_KEY});
+    if (!aiRef.current)
+      aiRef.current = new GoogleGenAI({
+        apiKey: process.env.EXPO_PUBLIC_GEMINI_KEY,
+      });
 
     try {
       const response = await aiRef.current.models.generateContent({
@@ -144,11 +177,11 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
           parts: [{ text: responseText }],
         });
         agentResponse.current = parsed;
-        if(disabledRef.current){
+        if (disabledRef.current) {
           messagesRef.current.pop();
           messagesRef.current.pop();
           setDisabled(false);
-        }else setState("speaking");
+        } else setState("speaking");
       } catch (e) {
         console.error("Response is not valid JSON:", e);
         throw e;
@@ -158,43 +191,46 @@ export const VoiceAgent = ( {tutorialName, uiHandlerFunction,size}:{tutorialName
       messagesRef.current.pop();
       setError(true);
     }
-  }
+  };
 
   //start speaking
-  const startSpeaking = ()=>{
+  const startSpeaking = () => {
+    console.log(messagesRef.current.length);
     uiHandlerFunction(agentResponse.current.highlight);
     Speak.speak(agentResponse.current.text, {
       language: langMap[language.current][0],
-      rate: 0.8,
-      onDone: ()=>{
+      rate: 0.9,
+      onDone: () => {
         setState("idle");
         setDisabled(false); //for safety
       },
-      onStopped:()=>{
+      onStopped: () => {
         //interruption case
         setDisabled(false);
-      }
+      },
     });
-  }
+  };
 
   //start aborting
-  const startAborting = async()=>{
+  const startAborting = async () => {
     ExpoSpeechRecognitionModule.stop();
     await Speak.stop();
-  }
+  };
 
-  const handleClick = async()=>{
-    if(stateRef.current !== "idle"){
+  const handleClick = async () => {
+    if (stateRef.current !== "idle") {
       //it means user is interrupting the current state
       setDisabled(true);
       setState("idle");
+    } else {
+      Speak.stop();
+      setState("listening")
     }
-    else setState("listening");
-  }
+  };
 
   return (
-    <TouchableOpacity onPress={()=>disabled?null:handleClick()}>
+    <TouchableOpacity onPress={() => (disabled ? null : handleClick())}>
       <AIAgentIcon state={state} size={size} />
     </TouchableOpacity>
   );
-}
+};

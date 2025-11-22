@@ -1,17 +1,22 @@
 // QR Scanner Page - React Native with Expo
 // File: app/qr.tsx
 
+import { AgentState } from "@/app/customComponents/AIAgentIcon";
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useTranslation } from "react-i18next";
+import * as Speak from "expo-speech";
 import {
   ArrowLeft,
   Flashlight,
   HelpCircle,
   Image as ImageIcon,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { default as React, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Dimensions,
@@ -21,6 +26,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -62,7 +69,9 @@ export default function QRScanner() {
   const [scanned, setScanned] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
   const uploadQRRef = React.useRef(null);
+  const isFocused = useIsFocused();
   const [highlightBox, setHighlightBox] = useState({
     x: 0,
     y: 0,
@@ -70,8 +79,14 @@ export default function QRScanner() {
     height: 0,
     visible: false,
   });
+  const languageRef = useRef<string|null>(null);
+  const [aiOn, setAiOn] = useState(false);
+
 
   useEffect(() => {
+    currentStepRef.current = currentStep;
+    Speak.stop();
+    speakInstruction(currentStep);
     if (currentStep === 1) {
       // Give layout a moment
       setTimeout(() => {
@@ -87,19 +102,17 @@ export default function QRScanner() {
           });
         }
       }, 200);
-    }
-    else {
+    } else {
       setHighlightBox((prev) => ({ ...prev, visible: false }));
     }
-
   }, [currentStep]);
 
   useEffect(() => {
-    // Request camera permission on mount
     if (!permission?.granted) {
       requestPermission();
     }
   }, []);
+
 
   // Handle camera lifecycle - activate/deactivate when screen is focused/unfocused
   useFocusEffect(
@@ -134,20 +147,32 @@ export default function QRScanner() {
     router.push("./enterAmount");
   };
 
+  const speakInstruction = async(step:number)=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(WALKTHROUGH_STEPS[step].description), {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
+
   // Handle next step
 
   const handleNextStep = () => {
-    if (currentStep < WALKTHROUGH_STEPS.length-1) {
+    if (currentStep < WALKTHROUGH_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     }
-    if(currentStep == WALKTHROUGH_STEPS.length-1){
-          setScanned(true);
+    if (currentStep == WALKTHROUGH_STEPS.length - 1) {
+      setScanned(true);
 
-    // Deactivate camera before navigation
-    setIsCameraActive(false);
+      // Deactivate camera before navigation
+      setIsCameraActive(false);
 
-    // Navigate to enter amount page
-    router.push("./enterAmount");
+      // Navigate to enter amount page
+      router.push("./enterAmount");
     }
   };
   const handlePreviousStep = () => {
@@ -216,16 +241,44 @@ export default function QRScanner() {
     );
   }
 
+
   return (
-    <View style={styles.container}>
-      <View
-        style={[{
+    <View style={styles.container} >
+      {isFocused && <TouchableOpacity
+        style={{
           position: "absolute",
-          width: width,
-          height: height + 100,
-          backgroundColor: "#0000008f",
-          zIndex: 10,
-        }, currentStep > 1 && {backgroundColor:"#00000007"}]}
+          top: 50,
+          right: 20,
+          zIndex: 500,
+        }}
+
+      >
+        <VoiceAgent
+          tutorialName="UPI_MB_2"
+          size={35}
+          uiHandlerFunction={(num: string) => {
+            const step = parseInt(num);
+            if (!isNaN(step)) {
+
+              setCurrentStep(step);
+            }
+          }}
+          introduce={false}
+          currentStepRef={currentStepRef}
+          onStateChange={(state:AgentState) => {if(state === "idle") setAiOn(false); else setAiOn(true)}}
+        />
+      </TouchableOpacity>}
+      <View
+        style={[
+          {
+            position: "absolute",
+            width: width,
+            height: height + 100,
+            backgroundColor: "#0000008f",
+            zIndex: 10,
+          },
+          currentStep > 1 && { backgroundColor: "#00000007" },
+        ]}
       />
       <View
         style={{
@@ -249,7 +302,7 @@ export default function QRScanner() {
         </Text>
 
         <View style={styles.tooltipButtons}>
-          {currentStep > 0 ? (
+          {currentStep > 0 && !aiOn ? (
             <TouchableOpacity onPress={handlePreviousStep}>
               <Text style={styles.prevButton}>Prev</Text>
             </TouchableOpacity>
@@ -258,9 +311,9 @@ export default function QRScanner() {
               <Text></Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={handleNextStep}>
+          {!aiOn && <TouchableOpacity onPress={handleNextStep}>
             <Text style={styles.nextButton}>Next</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>}
         </View>
       </View>
       {currentStep == 0 && (
@@ -287,7 +340,7 @@ export default function QRScanner() {
             styles.highlightUploadQR,
             {
               left: highlightBox.x,
-              top: highlightBox.y,
+              top: highlightBox.y+10,
               width: highlightBox.width,
               height: highlightBox.height,
             },
@@ -498,6 +551,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#fff",
     fontWeight: "500",
+    width: 100
   },
   loadingText: {
     flex: 1,

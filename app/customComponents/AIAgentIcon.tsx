@@ -5,17 +5,43 @@ import { ActivityIndicator, Animated, Easing, StyleSheet } from "react-native";
 
 export type AgentState = "idle" | "listening" | "processing" | "speaking";
 
-export function AIAgentIcon({ state,size }: { state: AgentState,size:number }) {
+export function AIAgentIcon({
+  state,
+  size,
+}: {
+  state: AgentState;
+  size: number;
+}) {
   const pulse = useRef(new Animated.Value(1)).current;
-  const spin = useRef(new Animated.Value(0)).current;
+  const shadowOpacity = useRef(new Animated.Value(0)).current;
+
+  const loopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
-    pulse.stopAnimation();
-    // spin.stopAnimation();
+    console.log("State changed to:", state);
+    
+    // Stop previous loop animation
+    if (loopRef.current) {
+      loopRef.current.stop();
+      loopRef.current = null;
+    }
 
+    // Animate pulse back to 1
+    Animated.timing(pulse, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    // Animate shadow opacity based on state
     if (state === "listening" || state === "speaking") {
-      // Pulse animation for listening and speaking
-      Animated.loop(
+      Animated.timing(shadowOpacity, {
+        toValue: 0.8,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+
+      loopRef.current = Animated.loop(
         Animated.sequence([
           Animated.timing(pulse, {
             toValue: 1.2,
@@ -30,70 +56,55 @@ export function AIAgentIcon({ state,size }: { state: AgentState,size:number }) {
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+
+      loopRef.current.start();
+    } else {
+      // Fade out shadow for idle/processing
+      Animated.timing(shadowOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     }
   }, [state]);
 
-  const rotate = spin.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
-
-  const renderIcon = () => {
-    switch (state) {
-      case "idle":
-        return (
-          <MaterialCommunityIcons
-            name="robot"
-            size={size}
-            color="#aaa"
-          />
-        );
-
-      case "listening":
-        return (
-          <Ionicons
-            name="mic"
-            size={size}
-            color="#00b18aff"
-          />
-        );
-
-      case "processing":
-        return (
-          <ActivityIndicator size={size} color="#00b18aff"/>
-        );
-
-      case "speaking":
-        return (
-          <MaterialCommunityIcons
-            name="robot-happy"
-            size={size}
-            color="#00b18aff"
-          />
-        );
-
-      default:
-        return null;
-    }
-  };
+  // Get shadow color based on state - force re-render by using state directly
+  const shadowColor =
+    state === "speaking"
+      ? "#00ffc8"
+      : state === "listening"
+      ? "#00bfff"
+      : "#000000"; // Use black with 0 opacity instead of transparent
 
   return (
     <Animated.View
+      key={state} // Force re-mount on state change - this ensures style updates
       style={[
         styles.container,
         {
           transform: [{ scale: pulse }],
-          shadowColor:
-            state === "speaking"
-              ? "#00ffc8"
-              : state === "listening"
-              ? "#00bfff"
-              : "transparent",
+          shadowColor: shadowColor,
+          shadowOpacity: shadowOpacity,
         },
       ]}
     >
-      {renderIcon()}
+      {state === "idle" && (
+        <MaterialCommunityIcons name="robot" size={size} color="#aaa" />
+      )}
+      {state === "listening" && (
+        <Ionicons name="mic" size={size} color="#00b18aff" />
+      )}
+      {state === "processing" && (
+        <ActivityIndicator size={size} color="#00b18aff" />
+      )}
+      {state === "speaking" && (
+        <MaterialCommunityIcons
+          name="robot-happy"
+          size={size}
+          color="#00b18aff"
+        />
+      )}
     </Animated.View>
   );
 }
@@ -104,7 +115,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 50,
     padding: 10,
-    shadowOpacity: 0.8,
     shadowRadius: 15,
     elevation: 8,
   },

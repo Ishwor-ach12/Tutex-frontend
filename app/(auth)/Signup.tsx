@@ -46,15 +46,22 @@ export default function Signup() {
     }
 
     try {
-      const response = await fetch("http://localhost:9004/auth/signup", {
+      const dateObj = form.dob;
+      const DOB = {
+        year: dateObj.getFullYear(),
+        month: dateObj.getMonth() + 1, // JS months are 0-based
+        day: dateObj.getDate(),
+      };
+
+      const response = await fetch("https://tutex-vq6j.onrender.com/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           email: form.email,
           password: form.password,
-          dateOfBirth: form.dob.toISOString().split("T")[0],
-          gender: form.gender,
+          DOB, // send DOB as object {year,month,day}
+          gender: form.gender, // must be one of "M" | "F" | "O"
         }),
       });
 
@@ -249,9 +256,9 @@ export default function Signup() {
               style={styles.picker}
               onValueChange={(val) => setForm({ ...form, gender: val })}
             >
-              <Picker.Item label="Male" value="Male" />
-              <Picker.Item label="Female" value="Female" />
-              <Picker.Item label="Other" value="Other" />
+              <Picker.Item label="Male" value="M" />
+              <Picker.Item label="Female" value="F" />
+              <Picker.Item label="Other" value="O" />
             </Picker>
           </View>
 

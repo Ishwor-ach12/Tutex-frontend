@@ -1,7 +1,13 @@
 // Enter Amount Page - React Native with Expo Router
 // File: app/enterAmount.tsx
 
+import { AgentState } from "@/app/customComponents/AIAgentIcon";
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import * as Speak from "expo-speech";
+
 import {
   ArrowLeft,
   Building2,
@@ -84,7 +90,12 @@ export default function EnterAmount() {
   const senderBankName = "Bank Name";
   const senderAccountLast4 = "1234";
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentStepRef = useRef<number>(currentStep);
+  const isFocused = useIsFocused();
   const amountRef = useRef<TextInput>(null);
+  const languageRef = useRef<string|null>(null);
+  const [aiOn, setAiOn] = useState(false);
+  
 
   const handleProceedToPay = () => {
     if (amount && parseFloat(amount) > 0) {
@@ -92,6 +103,18 @@ export default function EnterAmount() {
       setShowModal(true);
     }
   };
+  const speakInstruction = async(step:number)=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(WALKTHROUGH_STEPS[step].description), {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
+
 
   const handlePay = () => {
     if (currentStep == 3) return;
@@ -110,7 +133,7 @@ export default function EnterAmount() {
         }),
       },
     });
-  };
+  }
 
   useEffect(() => {
     if (amount == "120") {
@@ -134,8 +157,37 @@ export default function EnterAmount() {
     }
   };
 
+  useEffect(()=>{
+      currentStepRef.current = currentStep;
+      Speak.stop();
+      speakInstruction(currentStep);
+  },[currentStep]);
+
   return (
     <View style={styles.container}>
+      {isFocused && <View
+          style={{
+            position: "absolute",
+            top: 50,
+            right: 20,
+            zIndex: 1000,
+          }}
+        >
+          <VoiceAgent
+            tutorialName="UPI_MB_3"
+            size={35}
+            uiHandlerFunction={(num: string) => {
+              const step = parseInt(num);
+              if (!isNaN(step)) {
+  
+                setCurrentStep(Math.min(currentStep,step));
+              }
+            }}
+            introduce={false}
+            currentStepRef={currentStepRef}
+            onStateChange={(state:AgentState) => {if(state === "idle") setAiOn(false); else setAiOn(true)}}
+          />
+        </View>}
       {currentStep < 3 && (
         <View
           style={{
@@ -161,7 +213,7 @@ export default function EnterAmount() {
           </Text>
           {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
             <View style={styles.tooltipButtons}>
-              {currentStep > 0 ? (
+              {currentStep > 0 && !aiOn ? (
                 <TouchableOpacity onPress={handlePreviousStep}>
                   <Text style={styles.prevButton}>Prev</Text>
                 </TouchableOpacity>
@@ -170,9 +222,9 @@ export default function EnterAmount() {
                   <Text></Text>
                 </TouchableOpacity>
               )}
-              <TouchableOpacity onPress={handleNextStep}>
+              {!aiOn && <TouchableOpacity onPress={handleNextStep}>
                 <Text style={styles.nextButton}>Next</Text>
-              </TouchableOpacity>
+              </TouchableOpacity>}
             </View>
           ) : (
             <Text
@@ -401,7 +453,7 @@ export default function EnterAmount() {
               </Text>
               {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
                 <View style={styles.tooltipButtons}>
-                  {currentStep > 0 ? (
+                  {currentStep > 0 && !aiOn ? (
                     <TouchableOpacity onPress={handlePreviousStep}>
                       <Text style={styles.prevButton}>Prev</Text>
                     </TouchableOpacity>
@@ -410,9 +462,9 @@ export default function EnterAmount() {
                       <Text></Text>
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity onPress={handleNextStep}>
+                  {!aiOn && <TouchableOpacity onPress={handleNextStep}>
                     <Text style={styles.nextButton}>Next</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity>}
                 </View>
               ) : (
                 <Text

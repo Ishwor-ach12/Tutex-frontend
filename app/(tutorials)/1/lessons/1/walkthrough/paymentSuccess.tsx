@@ -1,15 +1,19 @@
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Speak from "expo-speech";
 import { CheckIcon, LayoutGridIcon, Share2Icon } from "lucide-react-native";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // --- INTERFACES & TYPES ---
@@ -37,6 +41,11 @@ export default function PaymentSuccessScreen() {
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const { amount, recipientName, refId } = useLocalSearchParams();
   const router = useRouter();
+  const isFocused = useIsFocused();
+  const currentStepRef = useRef<number>(0);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+
 
   // Get current date and time
   const formattedDateTime: string = useMemo(() => {
@@ -66,6 +75,8 @@ export default function PaymentSuccessScreen() {
   const recipientInitial: string = useMemo(() => {
     return recipientName.toLocaleString().charAt(0).toUpperCase();
   }, [recipientName]);
+
+  const languageRef = useRef<string|null>(null);
 
   const handleDone = async () => {
     try {
@@ -135,10 +146,54 @@ export default function PaymentSuccessScreen() {
     // Implement sharing functionality
   };
 
+  const speakInstruction = async()=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+
+    let speaktext = "";
+    if(languageRef.current === "en"){
+      speaktext = "Payment Successful. Click on `Done` button";
+    }else{
+      speaktext = "भुगतान सफल हुआ। ‘Done’ बटन पर क्लिक करें।";
+    }
+
+    Speak.speak(speaktext, {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
+
+  useEffect(()=>{
+    speakInstruction();
+  },[]);
+
+  
+
   return (
     <View style={styles.safeArea}>
       <View style={styles.container}>
         {/* Green Header Section */}
+        {isFocused && <View
+                style={{
+                  position: "absolute",
+                  top: 50,
+                  right: 20,
+                  zIndex: 500,
+                }}
+              >
+                <VoiceAgent
+                  tutorialName="UPI_MB_5"
+                  size={35}
+                  uiHandlerFunction={(num: string) => {
+                    setIsHighlighted(true);
+                  }}
+                  introduce={false}
+                  currentStepRef={currentStepRef}
+                />
+              </View>}
         <View style={styles.successHeader}>
           <View style={styles.checkmarkContainer}>
             <CheckIcon size={50} color="#4CAF50" />
@@ -200,7 +255,7 @@ export default function PaymentSuccessScreen() {
         <View style={styles.spacer} />
 
         {/* Done Button */}
-        <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
+        <TouchableOpacity style={[styles.doneButton,isHighlighted?{borderWidth: 5,borderColor: "#ffffff"}:{}]} onPress={handleDone}>
           {isButtonLoading ? (
             <ActivityIndicator size="large" color="#2196F3" />
           ) : (

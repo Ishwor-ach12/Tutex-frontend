@@ -1,3 +1,5 @@
+import { langMap, VoiceAgent } from "@/app/customComponents/VoiceAgent";
+import { useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ChevronDownIcon,
@@ -7,9 +9,12 @@ import {
   Dot,
   Minus,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import {useTranslation } from "react-i18next";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 // FIX: Using core React Native components
+import { AgentState } from "@/app/customComponents/AIAgentIcon";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Speak from "expo-speech";
 import {
   Alert,
   Dimensions,
@@ -20,6 +25,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 
 interface PaymentData {
   amount: string;
@@ -235,13 +241,17 @@ export default function PaymentPinScreen() {
   const refUrl = "https://phonepe.com";
   const amount = parsed.amount;
   const recipientName = parsed.recipientName;
+  const isFocused = useIsFocused();
+  const languageRef = useRef<string|null>(null);
+  const [aiOn, setAiOn] = useState(false);
+  
 
   // State definitions
   const [pin, setPin] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [pinError, setPinError] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
-
+  const currentStepRef = useRef<number>(currentStep);
   const handleKeyPress = (key: string): void => {
     setPinError(false);
 
@@ -284,6 +294,25 @@ export default function PaymentPinScreen() {
     if (pin == CORRECT_PIN) setCurrentStep(currentStep + 1);
   }, [pin]);
 
+  const speakInstruction = async(step:number)=>{
+    if(languageRef.current == null){
+      languageRef.current = (await AsyncStorage.getItem(
+        "user-language"
+      )) as string;
+    }
+    Speak.speak(t(WALKTHROUGH_STEPS[step].description), {
+      language: langMap[languageRef.current][0],
+      rate: 1
+    });
+  }
+
+
+  useEffect(()=>{
+        currentStepRef.current = currentStep;
+        Speak.stop();
+        speakInstruction(currentStep);
+    },[currentStep]);
+  
   // Render the PIN input display (dashes/dots)
   const renderPinInput = () => {
     const pinArray = Array.from({ length: PIN_LENGTH }, (_, i: number) => {
@@ -399,6 +428,29 @@ export default function PaymentPinScreen() {
 
   return (
     <View style={styles.container}>
+      {isFocused && <View
+            style={{
+              position: "absolute",
+              top: 20,
+              right: 20,
+              zIndex: 500,
+            }}
+          >
+            <VoiceAgent
+              tutorialName="UPI_MB_4"
+              size={35}
+              uiHandlerFunction={(num: string) => {
+                const step = parseInt(num);
+                if (!isNaN(step)) {
+    
+                  setCurrentStep(Math.min(currentStep,step));
+                }
+              }}
+              introduce={false}
+              currentStepRef={currentStepRef}
+              onStateChange={(state:AgentState) => {if(state === "idle") setAiOn(false); else setAiOn(true)}}
+            />
+          </View>}
       <View
         style={[
           {
@@ -433,7 +485,7 @@ export default function PaymentPinScreen() {
 
         {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
           <View style={styles.tooltipButtons}>
-            {currentStep > 0 ? (
+            {currentStep > 0 && !aiOn ? (
               <TouchableOpacity onPress={handlePreviousStep}>
                 <Text style={styles.prevButton}>Prev</Text>
               </TouchableOpacity>
@@ -442,9 +494,9 @@ export default function PaymentPinScreen() {
                 <Text></Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={handleNextStep}>
+            {!aiOn && <TouchableOpacity onPress={handleNextStep}>
               <Text style={styles.nextButton}>Next</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         ) : (
           console.log("enterPin", currentStep),
