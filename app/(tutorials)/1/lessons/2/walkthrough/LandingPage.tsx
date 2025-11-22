@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -29,10 +29,54 @@ import {
 
 const { width, height } = Dimensions.get("window");
 
+const WALKTHROUGH_STEPS = [
+  {
+    id: 1,
+    title: "Select Mobile Payment",
+    description:
+      "Tap the “To Mobile Number” option under the Money Transfers section to begin sending money using the recipient’s mobile number.",
+    top: "60%",
+    requiresAction: true,
+    actionText: "Tap on 'To Mobile Number' to continue",
+  },
+];
+
 export default function PhonePeLanding() {
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showHeader, setShowHeader] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const mobileButtonRef = useRef(null);
+    const [highlightBox, setHighlightBox] = useState({
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      visible: false,
+    });
+
+    useEffect(() => {
+      if (currentStep === 0) {
+        // Give layout a moment
+        setTimeout(() => {
+          if (mobileButtonRef.current != null) {
+            mobileButtonRef.current.measureInWindow((x, y, w, h) => {
+              setHighlightBox({
+                x,
+                y,
+                width: w,
+                height: h,
+                visible: true,
+              });
+            });
+          }
+        }, 200);
+      }
+      else {
+        setHighlightBox((prev) => ({ ...prev, visible: false }));
+      }
+  
+    }, [currentStep]);
 
   // Animated values for header fade-in
   const headerOpacity = scrollY.interpolate({
@@ -61,6 +105,67 @@ export default function PhonePeLanding() {
 
   return (
     <View style={styles.container}>
+      <View
+        style={{
+          position: "absolute",
+          width: width,
+          height: height + 100,
+          backgroundColor: "#0000008f",
+          zIndex: 1000,
+        }}
+      />
+      {currentStep == 0 && (
+        <View
+          style={{
+            position: "absolute",
+            backgroundColor: "#fff",
+            width: width / 1.2,
+            padding: 24,
+            zIndex: 9999,
+            top: WALKTHROUGH_STEPS[currentStep].top,
+            left: "50%",
+            transform: [{ translateX: -(width / 1.2 / 2) }],
+            elevation: 1000,
+            borderRadius: 10,
+          }}
+        >
+          <Text style={styles.tooltipTitle}>
+            {WALKTHROUGH_STEPS[currentStep].title}
+          </Text>
+          <Text style={styles.tooltipDescription}>
+            {WALKTHROUGH_STEPS[currentStep].description}
+          </Text>
+
+          <Text
+            style={{
+              textAlign: "center",
+              padding: 8,
+              fontSize: 16,
+              color: "#9c27b0",
+              fontWeight: "bold",
+            }}
+          >
+            {WALKTHROUGH_STEPS[currentStep].actionText}
+          </Text>
+        </View>
+      )}
+      {currentStep == 0 && (
+        <TouchableOpacity
+          style={[styles.iconButton, {position: "absolute", left: highlightBox.x,
+              top: highlightBox.y,
+              width: highlightBox.width,
+              height: highlightBox.height,zIndex:9999, marginTop: 33,elevation: 100, backgroundColor: "#fff", borderRadius: 10}]}
+          onPress={() => router.push("./sendMoney")}
+        >
+          <View style={styles.iconCircle}>
+            <View style={styles.iconBox}>
+              <Phone size={30} color="#491359ff" />
+              <View style={styles.activeDot} />
+            </View>
+          </View>
+          <Text style={styles.iconLabel}>To Mobile{"\n"}Number</Text>
+        </TouchableOpacity>
+      )}
       <View style={styles.topBar} />
 
       <Animated.View style={styles.scrollHeader}>
@@ -139,11 +244,11 @@ export default function PhonePeLanding() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Money Transfers</Text>
             <View style={styles.iconRow}>
-
               {/* ✅ To Mobile Number */}
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => router.push("./sendMoney")}
+                ref={mobileButtonRef}
               >
                 <View style={styles.iconCircle}>
                   <View style={styles.iconBox}>
@@ -183,10 +288,8 @@ export default function PhonePeLanding() {
                 </View>
                 <Text style={styles.iconLabel}>Check{"\n"}Balance</Text>
               </View>
-
             </View>
           </View>
-
 
           {/* Recharge & Bills Section */}
           <View style={styles.section2}>
@@ -234,13 +337,19 @@ export default function PhonePeLanding() {
               <TouchableOpacity style={styles.card}>
                 <Text style={styles.cardTitle}>Loans</Text>
                 <Text style={styles.cardSubtitle}>Personal, Gold and More</Text>
-                <Image source={require('@/assets/images/phonepeTutorial/loan.png')} style={styles.cardImage} />
+                <Image
+                  source={require("@/assets/images/phonepeTutorial/loan.png")}
+                  style={styles.cardImage}
+                />
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.card}>
                 <Text style={styles.cardTitle}>Insurance</Text>
                 <Text style={styles.offerText}>Offer</Text>
-                <Image source={require('@/assets/images/phonepeTutorial/insurance.png')} style={styles.cardImage} />
+                <Image
+                  source={require("@/assets/images/phonepeTutorial/insurance.png")}
+                  style={styles.cardImage}
+                />
               </TouchableOpacity>
             </View>
 
@@ -249,7 +358,10 @@ export default function PhonePeLanding() {
               <TouchableOpacity style={styles.card}>
                 <Text style={styles.cardTitle}>Digital Gold</Text>
                 <Text style={styles.cardSubtitle}>Save ₹10 daily</Text>
-                <Image source={require('@/assets/images/phonepeTutorial/savings.png')} style={styles.cardImage} />
+                <Image
+                  source={require("@/assets/images/phonepeTutorial/savings.png")}
+                  style={styles.cardImage}
+                />
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.card}>
@@ -258,7 +370,10 @@ export default function PhonePeLanding() {
                   Flight, Train, Bus, Hotel, Metro
                 </Text>
                 <Text style={styles.offerText}>Hotels Sale</Text>
-                <Image source={require('@/assets/images/phonepeTutorial/travel.png')} style={styles.cardImage} />
+                <Image
+                  source={require("@/assets/images/phonepeTutorial/travel.png")}
+                  style={styles.cardImage}
+                />
               </TouchableOpacity>
             </View>
 
@@ -267,7 +382,10 @@ export default function PhonePeLanding() {
               <TouchableOpacity style={styles.cardFull}>
                 <Text style={styles.cardTitle}>Mutual Funds</Text>
                 <Text style={styles.cardSubtitle}>SIPs & Investments</Text>
-                <Image source={require('@/assets/images/phonepeTutorial/mutual_funds.png')} style={styles.cardImage} />
+                <Image
+                  source={require("@/assets/images/phonepeTutorial/mutual_funds.png")}
+                  style={styles.cardImage}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -575,7 +693,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
-    mixBlendMode: "multiply"
+    mixBlendMode: "multiply",
   },
   offerText: {
     fontSize: 11,
@@ -670,5 +788,33 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#fff",
     fontWeight: "bold",
+  },
+  tooltipTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#000",
+  },
+  tooltipDescription: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 12,
+  },
+  tooltipButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  prevButton: {
+    color: "#666",
+    fontWeight: "600",
+  },
+  nextButton: {
+    backgroundColor: "#5f259f",
+    fontWeight: "bold",
+    color: "#fff",
+    paddingVertical: 8,
+    paddingHorizontal: 32,
+    fontSize: 18,
+    borderRadius: 5,
   },
 });

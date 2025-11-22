@@ -8,7 +8,6 @@ import {
   Minus,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import {useTranslation } from "react-i18next";
 // FIX: Using core React Native components
 import {
   Alert,
@@ -55,49 +54,48 @@ const CORRECT_PIN: string = "0000"; // Sample correct PIN
 const PIN_LENGTH: number = 4;
 const { width, height } = Dimensions.get("window");
 
-
 const WALKTHROUGH_STEPS = [
   {
     id: 1,
-    title: "qr_tutorial.enter_pin1_title",
+    title: "Verify Transaction Details",
     description:
-      "qr_tutorial.enter_pin1_description",
+      "Double-check the recipient name and amount before proceeding. Make sure everything is correct.",
     top: "25%",
     requiresAction: false,
   },
   {
     id: 2,
-    title: "qr_tutorial.enter_pin2_title",
+    title: "UPI PIN Entry",
     description:
-      "qr_tutorial.enter_pin2_description",
+      "Your UPI PIN is a secure password for authorizing payments. Never share your UPI PIN with anyone even your friends or officials. Bank officials will never ask for your PIN either.",
     top: "30%",
     requiresAction: false,
   },
   {
     id: 3,
-    title: "qr_tutorial.enter_pin3_title",
+    title: "PIN Security",
     description:
-      "qr_tutorial.enter_pin3_description",
+      "Enter your carefully as you have limited attempts. As you enter, the dashes will change to dots representing an entered digit.",
     top: "50%",
     requiresAction: false,
   },
   {
     id: 4,
-    title: "qr_tutorial.enter_pin4_title",
+    title: "Payment Authorization",
     description:
-      "qr_tutorial.enter_pin4_description",
+      "This is an encrypted keyboard that you have to use to enter your secret PIN.",
     top: "37%",
     requiresAction: true,
-    actionText: "qr_tutorial.enter_pin4_actiontext",
+    actionText: "Enter PIN 0000 to proceed",
   },
   {
     id: 5,
-    title: "qr_tutorial.enter_pin5_title",
+    title: "Payment Authorization",
     description:
-      "qr_tutorial.enter_pin5_description",
+      "Once you have entered the PIN click on check mark to send money.",
     top: "37%",
     requiresAction: true,
-    actionText: "qr_tutorial.enter_pin5_actiontext",
+    actionText: "Click on the check mark to continue",
   },
 ];
 
@@ -122,7 +120,6 @@ const KeypadButton: React.FC<KeypadButtonProps> = ({
       // Use CrossIcon placeholder
       <Delete size={32} color="#000" />
     ) : value === "check" ? (
-      // Use CheckIcon placeholder
       currentStep == 4 ? (
         <View
           style={{
@@ -227,7 +224,6 @@ const Keypad: React.FC<KeypadProps> = ({ onKeyPress, currentStep }) => {
 
 // --- Main Screen Component ---
 export default function PaymentPinScreen() {
-  const {t} = useTranslation();
   const router = useRouter();
   const { data } = useLocalSearchParams();
   const parsed = data ? JSON.parse(data as string) : {};
@@ -425,10 +421,10 @@ export default function PaymentPinScreen() {
         }}
       >
         <Text style={styles.tooltipTitle}>
-          {t(WALKTHROUGH_STEPS[currentStep].title)}
+          {WALKTHROUGH_STEPS[currentStep].title}
         </Text>
         <Text style={styles.tooltipDescription}>
-          {t(WALKTHROUGH_STEPS[currentStep].description)}
+          {WALKTHROUGH_STEPS[currentStep].description}
         </Text>
 
         {!WALKTHROUGH_STEPS[currentStep].requiresAction ? (
@@ -447,8 +443,6 @@ export default function PaymentPinScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          console.log("enterPin", currentStep),
-          
           <Text
             style={{
               textAlign: "center",
@@ -458,8 +452,7 @@ export default function PaymentPinScreen() {
               fontWeight: "bold",
             }}
           >
-
-            {t(WALKTHROUGH_STEPS[currentStep].actionText || "")}
+            {WALKTHROUGH_STEPS[currentStep].actionText}
           </Text>
         )}
       </View>
