@@ -1,12 +1,18 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function StartPage() {
   const router = useRouter();
   const handleModulePress = () => {
-    router.push("./LandingPage")
+    router.push("./LandingPage");
   };
 
   return (
@@ -20,7 +26,7 @@ export default function StartPage() {
 
         {/* Payment Info */}
         <LinearGradient
-          colors={['#6366f1', '#9333ea']}
+          colors={["#6366f1", "#9333ea"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.paymentCard}
@@ -31,20 +37,25 @@ export default function StartPage() {
 
         {/* QR Code */}
         <View style={styles.qrContainer}>
-          <Text>Saved Contact: Vivek</Text>
+          <Text>Account Details: </Text>
+          <Text style={{ fontWeight: "semibold" }}>
+            Account Number: 12345678901234
+          </Text>
+          <Text style={{ fontWeight: "semibold" }}>IFSC Code: DLXB0000258</Text>
+          <Text style={{ fontWeight: "semibold" }}>Account Name: Aadi</Text>
         </View>
 
         {/* Instructions */}
         <View style={styles.instructions}>
           <Text style={styles.instructionText}>
-            Send ₹120 to "Vivek" by searching his saved contact.
+            Send ₹120 to the specified account.
           </Text>
         </View>
 
         {/* Start Button */}
         <TouchableOpacity onPress={handleModulePress} activeOpacity={0.8}>
           <LinearGradient
-            colors={['#4f46e5', '#9333ea']}
+            colors={["#4f46e5", "#9333ea"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.button}
@@ -65,90 +76,90 @@ export default function StartPage() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#e0e7ff',
-    justifyContent: 'center',
+    backgroundColor: "#e0e7ff",
+    justifyContent: "center",
     padding: 16,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 24,
     padding: 24,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1f2937',
+    fontWeight: "bold",
+    color: "#1f2937",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: "#6b7280",
   },
   paymentCard: {
     borderRadius: 16,
     padding: 24,
     marginBottom: 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
   paymentLabel: {
     fontSize: 18,
-    color: 'white',
+    color: "white",
     marginBottom: 8,
   },
   amount: {
     fontSize: 40,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   qrContainer: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderRadius: 16,
     padding: 24,
     marginBottom: 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
   qrWrapper: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 12,
   },
   instructions: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   instructionText: {
     fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
+    color: "#6b7280",
+    textAlign: "center",
   },
   button: {
     borderRadius: 16,
     paddingVertical: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   footer: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
-    color: '#9ca3af',
+    color: "#9ca3af",
     marginTop: 24,
   },
 });
